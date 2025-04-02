@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.snap linguist-generated
+justfile linguist-vendored
+*.html linguist-vendored
+*.css linguist-generated
+.plist linguist-vendored
