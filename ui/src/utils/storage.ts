@@ -1,4 +1,4 @@
-import { Theme } from '~/consts';
+import { Langs, Theme } from '~/consts';
 
 const THEME_KEY = 'theme';
 const LANG_KEY = 'language';
@@ -17,7 +17,7 @@ export const storage = {
   },
 
   getLanguage(): string {
-    return localStorage.getItem(LANG_KEY) || 'en';
+    return localStorage.getItem(LANG_KEY) || Langs.En;
   },
 
   setLanguage(v: string) {

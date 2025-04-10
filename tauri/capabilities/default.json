@@ -7,7 +7,11 @@
     "core:window:allow-set-theme",
     "core:window:allow-start-dragging",
     "core:window:allow-internal-toggle-maximize",
+    "core:event:default",
     "opener:allow-open-url",
-    "opener:allow-default-urls"
+    "opener:allow-default-urls",
+    "clipboard:read-all",
+    "clipboard:write-all",
+    "clipboard:monitor-all"
   ]
 }

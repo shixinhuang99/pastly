@@ -9,5 +9,10 @@ export const zh: Record<TranslationKeys, string> = {
   'Reveal in dir': '在{{name}}中显示',
   Finder: '访达',
   'File Explorer': '文件资源管理器',
-  'No data': '无数据',
+
+  noData: '无数据',
+  searchByKeyword: '按关键词搜索',
+  text: '文本',
+  image: '图片',
+  files: '文件',
 };

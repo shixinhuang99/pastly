@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Select, TooltipButton } from '~/components';
 import { GitHub } from '~/components/icons';
 import { SelectIconTrigger } from '~/components/one-select';
+import { Langs } from '~/consts';
 import { useT } from '~/hooks';
 import { storage } from '~/utils/storage';
 import { ThemeToggle } from './theme-toggle';
@@ -12,17 +13,15 @@ import { ThemeToggle } from './theme-toggle';
 export function AppHeader() {
   return (
     <div
-      className="w-full h-11 flex justify-between items-center px-4 py-1 border-b border-border/50 dark:border-border"
+      className="w-full h-11 flex justify-center items-center px-4 py-1 border-b border-border/50 dark:border-border relative"
       data-tauri-drag-region
     >
-      <div className="flex items-end gap-1 p-3 ml-10">
+      <div className="flex items-center gap-1 p-3">
         <img className="size-8" src="/icon.ico" alt="app logo icon" />
-        <span className="font-serif">{PKG_NAME}</span>
-        <span className="font-extralight text-xs pl-1 pb-[3px]">
-          {PKG_VERSION}
-        </span>
+        <span className="font-serif text-lg">{PKG_NAME}</span>
+        <span className="font-extralight text-xs pt-1">{PKG_VERSION}</span>
       </div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 absolute right-4">
         <ChangeLanguageButton />
         <ThemeToggle />
         <ViewGitHubButton />
@@ -65,8 +64,8 @@ function ChangeLanguageButton() {
       value={value}
       onChange={handleLanguageChange}
       options={[
-        { label: 'English', value: 'en' },
-        { label: '简体中文', value: 'zh' },
+        { label: 'English', value: Langs.En },
+        { label: '简体中文', value: Langs.Zh },
       ]}
     />
   );

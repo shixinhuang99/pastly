@@ -7,7 +7,12 @@ export const en = {
   'Reveal in dir': 'Reveal in {{name}}',
   Finder: 'Finder',
   'File Explorer': 'File Explorer',
-  'No data': 'No data',
+
+  noData: 'No data',
+  searchByKeyword: 'Search by keyword',
+  text: 'Text',
+  image: 'Image',
+  files: 'Files',
 };
 
 export type TranslationKeys = keyof typeof en;

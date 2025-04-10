@@ -40,6 +40,9 @@
         "noExplicitAny": {
           "level": "off"
         }
+      },
+      "a11y": {
+        "noRedundantAlt": "off"
       }
     }
   },

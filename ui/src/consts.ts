@@ -1,5 +1,3 @@
-import { isTauri } from '@tauri-apps/api/core';
-
 export const Theme = {
   Dark: 'dark',
   Light: 'light',
@@ -7,3 +5,8 @@ export const Theme = {
 } as const;
 
 export const DARK_MODE_MEDIA = '(prefers-color-scheme: dark)';
+
+export const Langs = {
+  En: 'en',
+  Zh: 'zh',
+} as const;
