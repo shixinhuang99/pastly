@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
-import type { ClipItem, ThemeCfg } from '~/types';
+import { atomWithStorage } from 'jotai/utils';
+import type { ClipItem, Settings, ThemeCfg } from '~/types';
 
 export const themeAtom = atom<ThemeCfg>({
   display: '',
@@ -9,3 +10,13 @@ export const themeAtom = atom<ThemeCfg>({
 export const clipItemsAtom = atom<ClipItem[]>([]);
 
 export const writeToClipboardPendingAtom = atom(false);
+
+export const settingsAtom = atomWithStorage<Settings>(
+  'settings',
+  {
+    maxItemsCount: 10000,
+    trayItemsCount: 5,
+  },
+  undefined,
+  { getOnInit: true },
+);

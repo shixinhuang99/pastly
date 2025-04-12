@@ -13,7 +13,12 @@ export const en = {
   text: 'Text',
   image: 'Image',
   files: 'Files',
-  itemsCount: '{{found}} / {{total}} Items',
+  itemsCount: '{{count}} Items',
+  settings: 'Settings',
+  applicationSettings: 'Application Settings',
+  maxItemsCount: 'Max items count',
+  trayItemsCount: 'Tray items count',
+  version: 'Version',
 };
 
 export type TranslationKeys = keyof typeof en;

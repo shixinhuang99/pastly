@@ -116,12 +116,7 @@ export function List() {
           onValueChange={setSearch}
           placeholder={t('searchByKeyword')}
         />
-        <div>
-          {t('itemsCount', {
-            found: filteredClipItems.length,
-            total: clipItems.length,
-          })}
-        </div>
+        <div>{t('itemsCount', { count: clipItems.length })}</div>
       </div>
       <VirtualList
         ref={virtualListRef}

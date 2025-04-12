@@ -1,13 +1,11 @@
-import { openUrl } from '@tauri-apps/plugin-opener';
 import { Languages } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Select, TooltipButton } from '~/components';
-import { GitHub } from '~/components/icons';
+import { Select } from '~/components';
 import { SelectIconTrigger } from '~/components/one-select';
 import { Langs } from '~/consts';
-import { useT } from '~/hooks';
 import { storage } from '~/utils/storage';
+import { SettingsDialog } from '~/views/settings';
 import { ThemeToggle } from './theme-toggle';
 
 export function AppHeader() {
@@ -19,27 +17,13 @@ export function AppHeader() {
       <div className="flex items-center gap-1 p-3">
         <img className="size-8" src="/icon.ico" alt="app logo icon" />
         <span className="font-serif text-lg">{PKG_NAME}</span>
-        <span className="font-extralight text-xs pt-1">{PKG_VERSION}</span>
       </div>
       <div className="flex items-center gap-1.5 absolute right-4">
         <ChangeLanguageButton />
         <ThemeToggle />
-        <ViewGitHubButton />
+        <SettingsDialog />
       </div>
     </div>
-  );
-}
-
-function ViewGitHubButton() {
-  const t = useT();
-
-  return (
-    <TooltipButton
-      tooltip={t('viewSourceCode')}
-      onClick={() => openUrl(REPOSITORY_URL)}
-    >
-      <GitHub />
-    </TooltipButton>
   );
 }
 

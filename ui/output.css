@@ -589,24 +589,24 @@ video {
 
 .dark {
   --background: 210 34.38% 12.55%;
-  --foreground: 210 20% 98%;
-  --card: 224 71.4% 4.1%;
-  --card-foreground: 210 20% 98%;
-  --popover: 224 71.4% 4.1%;
-  --popover-foreground: 210 20% 98%;
-  --primary: 263.4 70% 50.4%;
-  --primary-foreground: 210 20% 98%;
-  --secondary: 215 27.9% 16.9%;
-  --secondary-foreground: 210 20% 98%;
-  --muted: 215 27.9% 16.9%;
-  --muted-foreground: 217.9 10.6% 64.9%;
-  --accent: 215 27.9% 16.9%;
-  --accent-foreground: 210 20% 98%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 20% 98%;
-  --border: 215 27.9% 16.9%;
-  --input: 215 27.9% 16.9%;
-  --ring: 263.4 70% 50.4%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 48%;
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
@@ -732,6 +732,10 @@ body {
   margin-top: 0.5rem;
 }
 
+.mt-4 {
+  margin-top: 1rem;
+}
+
 .block {
   display: block;
 }
@@ -807,6 +811,10 @@ body {
   height: 1px;
 }
 
+.h-\[200px\] {
+  height: 200px;
+}
+
 .h-\[50px\] {
   height: 50px;
 }
@@ -869,6 +877,10 @@ body {
 
 .w-\[1px\] {
   width: 1px;
+}
+
+.w-\[400px\] {
+  width: 400px;
 }
 
 .w-full {
@@ -1284,6 +1296,11 @@ body {
   padding: 1px;
 }
 
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
 .px-1\.5 {
   padding-left: 0.375rem;
   padding-right: 0.375rem;
@@ -1367,10 +1384,6 @@ body {
   padding-top: 0px;
 }
 
-.pt-1 {
-  padding-top: 0.25rem;
-}
-
 .text-left {
   text-align: left;
 }
@@ -1401,10 +1414,6 @@ body {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.font-extralight {
-  font-weight: 200;
 }
 
 .font-medium {

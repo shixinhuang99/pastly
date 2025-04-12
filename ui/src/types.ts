@@ -16,3 +16,8 @@ export type ClipItem =
   | BaseClipItem<'text', string>
   | BaseClipItem<'image', string>
   | BaseClipItem<'files', string[]>;
+
+export interface Settings {
+  maxItemsCount: number;
+  trayItemsCount: number;
+}
