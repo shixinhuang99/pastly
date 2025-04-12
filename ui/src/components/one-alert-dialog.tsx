@@ -38,10 +38,10 @@ export function OneAlertDialog(
         {children}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={okLoading}>
-            {t('Cancel')}
+            {t('cancel')}
           </AlertDialogCancel>
           <Button onClick={onOk} disabled={okLoading}>
-            {okLoading ? <LoaderCircle className="animate-spin" /> : t('Ok')}
+            {okLoading ? <LoaderCircle className="animate-spin" /> : t('ok')}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

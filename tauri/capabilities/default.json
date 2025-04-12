@@ -10,6 +10,7 @@
     "core:event:default",
     "opener:allow-open-url",
     "opener:allow-default-urls",
+    "opener:allow-reveal-item-in-dir",
     "clipboard:read-all",
     "clipboard:write-all",
     "clipboard:monitor-all"

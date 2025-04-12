@@ -7,3 +7,5 @@ export const themeAtom = atom<ThemeCfg>({
 });
 
 export const clipItemsAtom = atom<ClipItem[]>([]);
+
+export const writeToClipboardPendingAtom = atom(false);

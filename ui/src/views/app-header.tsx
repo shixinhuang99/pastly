@@ -35,7 +35,7 @@ function ViewGitHubButton() {
 
   return (
     <TooltipButton
-      tooltip={t('View source code')}
+      tooltip={t('viewSourceCode')}
       onClick={() => openUrl(REPOSITORY_URL)}
     >
       <GitHub />
