@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '~/utils/cn';
 import { Input } from './shadcn/input';
 
@@ -21,21 +21,32 @@ export function InputNumber(props: InputNumberProps) {
 
   const [draftValue, setDraftValue] = useState(value?.toString() ?? '');
 
-  useEffect(() => {
-    setDraftValue(value?.toString() ?? '');
-  }, [value]);
+  const isInvalidValue = (valueAsNumber: number): boolean => {
+    return (
+      Number.isNaN(valueAsNumber) ||
+      !Number.isSafeInteger(valueAsNumber) ||
+      valueAsNumber < minValue ||
+      valueAsNumber > maxValue
+    );
+  };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const valueAfterBlur = Number.parseInt(e.target.value, 10);
-    if (
-      Number.isNaN(valueAfterBlur) ||
-      !Number.isSafeInteger(valueAfterBlur) ||
-      valueAfterBlur < minValue ||
-      valueAfterBlur > maxValue
-    ) {
+    const valueAsNumber = e.target.valueAsNumber;
+    if (isInvalidValue(valueAsNumber)) {
       setDraftValue(value?.toString() ?? '');
       return;
     }
+    setDraftValue(valueAsNumber.toString());
+    onChange(e);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valueAsNumber = e.target.valueAsNumber;
+    if (isInvalidValue(valueAsNumber)) {
+      setDraftValue(e.target.value);
+      return;
+    }
+    setDraftValue(valueAsNumber.toString());
     onChange(e);
   };
 
@@ -44,7 +55,7 @@ export function InputNumber(props: InputNumberProps) {
       className={cn('dark:bg-gray-900', className)}
       type="number"
       value={draftValue}
-      onChange={(e) => setDraftValue(e.target.value)}
+      onChange={handleChange}
       onBlur={handleBlur}
       {...restProps}
     />

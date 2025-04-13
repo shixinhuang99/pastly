@@ -42,7 +42,8 @@
         }
       },
       "a11y": {
-        "noRedundantAlt": "off"
+        "noRedundantAlt": "off",
+        "noNoninteractiveTabindex": "off"
       }
     }
   },

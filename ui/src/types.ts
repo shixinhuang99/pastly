@@ -3,9 +3,9 @@ export interface ThemeCfg {
   className: string;
 }
 
-export type ClipItemType = 'text' | 'image' | 'files';
+export type ClipItemTypes = 'text' | 'image' | 'files';
 
-export interface BaseClipItem<T extends ClipItemType, P> {
+export interface BaseClipItem<T extends ClipItemTypes, P> {
   id: string;
   type: T;
   value: P;
@@ -21,3 +21,10 @@ export interface Settings {
   maxItemsCount: number;
   trayItemsCount: number;
 }
+
+export type ClipItemDBSchema = {
+  id: string;
+  type: ClipItemTypes;
+  value: string;
+  date: number;
+};

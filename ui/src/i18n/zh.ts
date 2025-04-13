@@ -5,7 +5,6 @@ export const zh: Record<TranslationKeys, string> = {
   cancel: '取消',
   toggleTheme: '切换主题',
   viewSourceCode: '查看源代码',
-  opreationFailed: '操作失败',
   revealInDir: '在{{name}}中显示',
   finder: '访达',
   fileExplorer: '文件资源管理器',
@@ -21,4 +20,7 @@ export const zh: Record<TranslationKeys, string> = {
   maxItemsCount: '最大条目数',
   trayItemsCount: '托盘条目数',
   version: '版本',
+  somethingWentWrong: '出错了 :(',
+  deleteAllClipItems: '删除所有剪贴板条目',
+  openDatabaseDir: '打开数据库目录',
 };

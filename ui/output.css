@@ -811,8 +811,8 @@ body {
   height: 1px;
 }
 
-.h-\[200px\] {
-  height: 200px;
+.h-\[270px\] {
+  height: 270px;
 }
 
 .h-\[50px\] {
@@ -1416,6 +1416,10 @@ body {
   line-height: 1rem;
 }
 
+.font-bold {
+  font-weight: 700;
+}
+
 .font-medium {
   font-weight: 500;
 }
@@ -1538,6 +1542,11 @@ body {
 
 .ring-offset-background {
   --tw-ring-offset-color: hsl(var(--background));
+}
+
+.blur {
+  --tw-blur: blur(8px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
 .filter {

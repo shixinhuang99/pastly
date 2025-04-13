@@ -8,11 +8,12 @@
     "core:window:allow-start-dragging",
     "core:window:allow-internal-toggle-maximize",
     "core:event:default",
-    "opener:allow-open-url",
-    "opener:allow-default-urls",
-    "opener:allow-reveal-item-in-dir",
+    "core:path:default",
+    "opener:default",
     "clipboard:read-all",
     "clipboard:write-all",
-    "clipboard:monitor-all"
+    "clipboard:monitor-all",
+    "sql:default",
+    "sql:allow-execute"
   ]
 }

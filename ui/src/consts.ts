@@ -10,3 +10,5 @@ export const Langs = {
   En: 'en',
   Zh: 'zh',
 } as const;
+
+export const DB_NAME = 'pastly.db';

@@ -5,10 +5,10 @@ import { Select } from '~/components';
 import { SelectIconTrigger } from '~/components/one-select';
 import { Langs } from '~/consts';
 import { storage } from '~/utils/storage';
-import { SettingsDialog } from '~/views/settings';
+import { SettingsDialog } from './settings';
 import { ThemeToggle } from './theme-toggle';
 
-export function AppHeader() {
+export function Header() {
   return (
     <div
       className="w-full h-11 flex justify-center items-center px-4 py-1 border-b border-border/50 dark:border-border relative"

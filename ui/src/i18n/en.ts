@@ -3,7 +3,6 @@ export const en = {
   cancel: 'Cancel',
   toggleTheme: 'Toggle theme',
   viewSourceCode: 'View source code',
-  opreationFailed: 'Opreation failed',
   revealInDir: 'Reveal in {{name}}',
   finder: 'Finder',
   fileExplorer: 'File Explorer',
@@ -19,6 +18,9 @@ export const en = {
   maxItemsCount: 'Max items count',
   trayItemsCount: 'Tray items count',
   version: 'Version',
+  somethingWentWrong: 'Something went wrong :(',
+  deleteAllClipItems: 'Delete all clip items',
+  openDatabaseDir: 'Open database dir',
 };
 
 export type TranslationKeys = keyof typeof en;
