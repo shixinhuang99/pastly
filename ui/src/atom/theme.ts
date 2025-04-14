@@ -1,10 +1,13 @@
 import { isTauri } from '@tauri-apps/api/core';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { atom } from 'jotai';
-import { Theme } from '~/consts';
+import { DARK_MODE_MEDIA, Theme } from '~/consts';
 import { storage } from '~/utils/storage';
-import { isSystemDark } from '~/utils/theme';
 import { themeAtom } from './primitive';
+
+function isSystemDark() {
+  return window.matchMedia(DARK_MODE_MEDIA).matches;
+}
 
 function setTheme(theme: string) {
   if (!isTauri()) {

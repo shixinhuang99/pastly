@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { Langs } from '~/consts';
 import { storage } from '~/utils/storage';
-import { en } from './en';
+import { type TranslationKeys, en } from './en';
 import { zh } from './zh';
 
 export function initI18n() {
@@ -27,4 +27,8 @@ export function initI18n() {
   });
 
   document.documentElement.lang = lang;
+}
+
+export function t(key: TranslationKeys, obj?: Record<string, any>) {
+  return i18n.t(key, obj);
 }

@@ -1,11 +1,32 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::{Manager, RunEvent};
+
 fn main() {
-	tauri::Builder::default()
+	let app = tauri::Builder::default()
+		.setup(|app| {
+			#[cfg(debug_assertions)]
+			if let Some(window) = app.get_webview_window("main") {
+				window.open_devtools();
+			};
+
+			Ok(())
+		})
 		.invoke_handler(tauri::generate_handler![])
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_clipboard::init())
 		.plugin(tauri_plugin_sql::Builder::default().build())
-		.run(tauri::generate_context!())
+		.build(tauri::generate_context!())
 		.expect("Failed to launch app");
+
+	app.run(|app_handle, event| {
+		#[cfg(target_os = "macos")]
+		if let RunEvent::Reopen { .. } = event {
+			let Some(window) = app_handle.get_webview_window("main") else {
+				return;
+			};
+			let _ = window.show();
+			let _ = window.set_focus();
+		}
+	});
 }

@@ -1,11 +1,12 @@
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { Settings } from 'lucide-react';
 import { ExternalLink, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
 import { settingsAtom } from '~/atom/primitive';
+import { updateSettingsAtom } from '~/atom/settings';
 import { Button, InputNumber, TooltipButton } from '~/components';
 import {
   Dialog,
@@ -20,12 +21,9 @@ import { DB_NAME } from '~/consts';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
 
 export function SettingsDialog() {
-  const [settings, setSettings] = useAtom(settingsAtom);
+  const settings = useAtomValue(settingsAtom);
+  const updateSettings = useSetAtom(updateSettingsAtom);
   const t = useT();
-
-  const handleSettingsChange = (v: Record<string, any>) => {
-    setSettings((old) => ({ ...old, ...v }));
-  };
 
   return (
     <Dialog>
@@ -40,7 +38,7 @@ export function SettingsDialog() {
           <DialogDescription>{t('applicationSettings')}</DialogDescription>
         </DialogHeader>
         <div className="h-[270px] px-1">
-          <Form value={settings} onChange={handleSettingsChange}>
+          <Form value={settings} onChange={updateSettings}>
             <FormItem
               name="maxItemsCount"
               label={t('maxItemsCount')}

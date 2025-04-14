@@ -1,0 +1,152 @@
+import { Menu, MenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu';
+import { TrayIcon } from '@tauri-apps/api/tray';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { clear, writeText } from 'tauri-plugin-clipboard-api';
+import { toastError } from '~/components';
+import { t } from '~/i18n';
+import type { TextClipItem } from '~/types';
+
+let tray: TrayIcon | null = null;
+let menu: Menu | null = null;
+
+const PreDefMenuItemId = {
+  NoData: 'noData',
+  Clear: 'clear',
+  ShowWindow: 'showWindow',
+  Quit: 'quit',
+} as const;
+
+export async function initTrayMenu(clipItems: TextClipItem[]) {
+  if (!tray) {
+    tray = await TrayIcon.getById('main');
+  }
+  if (!menu && tray) {
+    menu = await Menu.new({ id: 'trayMenu' });
+  }
+  if (!tray || !menu) {
+    return;
+  }
+  const clipMenuItems = await createClipMenuItems(clipItems);
+  menu.append(clipMenuItems);
+  if (!clipItems.length) {
+    const noDataItem = await MenuItem.new({
+      id: PreDefMenuItemId.NoData,
+      text: t('noData'),
+      enabled: false,
+    });
+    await menu.append(noDataItem);
+  }
+  const speratorItem = await PredefinedMenuItem.new({ item: 'Separator' });
+  const clearClipboardItem = await MenuItem.new({
+    id: PreDefMenuItemId.Clear,
+    text: t('clearClipboard'),
+    accelerator: 'Cmd+D',
+    async action() {
+      await clear();
+    },
+  });
+  const showWindowItem = await MenuItem.new({
+    id: PreDefMenuItemId.ShowWindow,
+    text: t('showWindow'),
+    accelerator: 'Cmd+W',
+    async action() {
+      const ww = getCurrentWebviewWindow();
+      await ww.show();
+      await ww.setFocus();
+    },
+  });
+  const quitItem = await MenuItem.new({
+    id: PreDefMenuItemId.Quit,
+    text: t('quit'),
+    accelerator: 'Cmd+Q',
+    async action() {
+      const ww = getCurrentWebviewWindow();
+      await ww.destroy();
+    },
+  });
+  await menu.append([
+    speratorItem,
+    clearClipboardItem,
+    showWindowItem,
+    quitItem,
+  ]);
+  await tray.setMenu(menu);
+}
+
+async function createClipMenuItems(
+  clipItems: TextClipItem[],
+): Promise<MenuItem[]> {
+  let index = 1;
+  const genAccelerator = () => {
+    if (index < 1 || index > 10) {
+      return undefined;
+    }
+    return `Cmd+${index === 10 ? 0 : index}`;
+  };
+  const items: MenuItem[] = [];
+  window.__pastly.trayClipItemIds = [];
+  for (const clipItem of clipItems) {
+    const item = await MenuItem.new({
+      id: clipItem.id,
+      text: clipItem.value.slice(0, 10),
+      accelerator: genAccelerator(),
+      async action(id) {
+        try {
+          window.__pastly.copiedItemId = id;
+          await writeText(clipItem.value);
+        } catch (error) {
+          toastError(t('somethingWentWrong'), error);
+          window.__pastly.copiedItemId = '';
+        }
+      },
+    });
+    window.__pastly.trayClipItemIds.push(clipItem.id);
+    index += 1;
+    items.push(item);
+  }
+  return items;
+}
+
+export async function changeTrayMenuLanguage() {
+  if (!tray || !menu) {
+    return;
+  }
+  const items = await menu.items();
+  for (const item of items) {
+    if (item.id === PreDefMenuItemId.NoData) {
+      await item.setText(t('noData'));
+    } else if (item.id === PreDefMenuItemId.Clear) {
+      await item.setText(t('clearClipboard'));
+    } else if (item.id === PreDefMenuItemId.ShowWindow) {
+      await item.setText(t('showWindow'));
+    } else if (item.id === PreDefMenuItemId.Quit) {
+      await item.setText(t('quit'));
+    }
+  }
+}
+
+export async function updateTrayMenuItems(clipItems: TextClipItem[]) {
+  if (!tray || !menu) {
+    return;
+  }
+  const items = await menu.items();
+  for (const item of items) {
+    if (
+      item.id === PreDefMenuItemId.NoData ||
+      window.__pastly.trayClipItemIds.includes(item.id)
+    ) {
+      await menu.remove(item);
+    }
+  }
+  if (clipItems.length) {
+    const clipMenuItems = await createClipMenuItems(clipItems);
+    menu.insert(clipMenuItems, 0);
+  } else {
+    const noDataItem = await MenuItem.new({
+      id: PreDefMenuItemId.NoData,
+      text: t('noData'),
+      enabled: false,
+    });
+    await menu.insert(noDataItem, 0);
+  }
+}

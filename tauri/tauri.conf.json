@@ -20,6 +20,11 @@
         "hiddenTitle": true
       }
     ],
+    "trayIcon": {
+      "iconPath": "../assets/tray_32x32.png",
+      "iconAsTemplate": true,
+      "tooltip": "Pastly"
+    },
     "security": {
       "csp": null
     }

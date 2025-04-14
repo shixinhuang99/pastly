@@ -21,6 +21,9 @@ export const en = {
   somethingWentWrong: 'Something went wrong :(',
   deleteAllClipItems: 'Delete all clip items',
   openDatabaseDir: 'Open database dir',
+  clearClipboard: 'Clear Clipboard',
+  showWindow: 'Show Window',
+  quit: 'Quit',
 };
 
 export type TranslationKeys = keyof typeof en;

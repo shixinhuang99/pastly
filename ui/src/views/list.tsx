@@ -33,8 +33,6 @@ import type { BaseClipItem, ClipItem, ClipItemTypes } from '~/types';
 import { cn, scrollBarVariants } from '~/utils/cn';
 import { fmtDate, fmtDateDistance } from '~/utils/common';
 
-let copiedItemId = '';
-
 function createClipItem<T extends ClipItemTypes, P>(
   type: T,
   value: P,
@@ -77,12 +75,12 @@ export function List() {
         if (!newClipItem) {
           return;
         }
-        addClipItem(newClipItem, copiedItemId);
-        if (!copiedItemId) {
+        addClipItem(newClipItem, window.__pastly.copiedItemId);
+        if (!window.__pastly.copiedItemId) {
           virtualListRef.current?.scrollToTop();
         }
         setWriteToClipboardPending(false);
-        copiedItemId = '';
+        window.__pastly.copiedItemId = '';
       });
       startListening();
     } finally {
@@ -161,7 +159,7 @@ function Item(props: { clipItem: ClipItem }) {
 
   const handleCopy = async () => {
     try {
-      copiedItemId = id;
+      window.__pastly.copiedItemId = id;
       setWriteToClipboardPending(true);
       if (type === 'text') {
         await writeText(value);
@@ -172,7 +170,7 @@ function Item(props: { clipItem: ClipItem }) {
       }
     } catch (error) {
       toastError(t('somethingWentWrong'), error);
-      copiedItemId = '';
+      window.__pastly.copiedItemId = '';
       setWriteToClipboardPending(false);
     }
   };

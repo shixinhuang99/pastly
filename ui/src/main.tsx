@@ -2,6 +2,7 @@ import { LoaderCircle } from 'lucide-react';
 import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initI18n } from '~/i18n';
+import { setupWindow } from '~/utils/window';
 
 function Loading() {
   return (
@@ -31,4 +32,13 @@ function main() {
   );
 }
 
+function initGlobalVar() {
+  window.__pastly = {
+    copiedItemId: '',
+    trayClipItemIds: [],
+  };
+}
+
+initGlobalVar();
+setupWindow();
 main();

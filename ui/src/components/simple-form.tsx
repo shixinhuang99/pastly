@@ -3,29 +3,29 @@ import { createContext, useContext, useMemo } from 'react';
 import { cn } from '~/utils/cn';
 import { Label } from './shadcn/label';
 
-interface FormProps
+interface FormProps<T>
   extends Omit<React.ComponentProps<'form'>, 'value' | 'onChange'> {
-  value: Record<string, any>;
-  onChange: (v: Record<string, any>) => void;
+  value: T;
+  onChange: (v: T) => void;
 }
 
-interface IFormContext {
-  value: Record<string, any>;
-  onChange: (v: Record<string, any>) => void;
+interface IFormContext<T> {
+  value: T;
+  onChange: (v: T) => void;
 }
 
-const FormContext = createContext<IFormContext>({
+const FormContext = createContext<IFormContext<any>>({
   value: {},
   onChange: () => {},
 });
 
-export function Form(props: FormProps) {
+export function Form<T>(props: FormProps<T>) {
   const { value, onChange, className, children, ...restProps } = props;
 
   const contextValue = useMemo(() => {
     return {
       value,
-      onChange: (partialValue: Record<string, any>) => {
+      onChange: (partialValue: T) => {
         onChange({ ...value, ...partialValue });
       },
     };

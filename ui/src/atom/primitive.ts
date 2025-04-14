@@ -15,7 +15,7 @@ export const settingsAtom = atomWithStorage<Settings>(
   'settings',
   {
     maxItemsCount: 10000,
-    trayItemsCount: 5,
+    trayItemsCount: 10,
   },
   undefined,
   { getOnInit: true },

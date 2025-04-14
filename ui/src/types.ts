@@ -12,8 +12,10 @@ export interface BaseClipItem<T extends ClipItemTypes, P> {
   date: number;
 }
 
+export type TextClipItem = BaseClipItem<'text', string>;
+
 export type ClipItem =
-  | BaseClipItem<'text', string>
+  | TextClipItem
   | BaseClipItem<'image', string>
   | BaseClipItem<'files', string[]>;
 

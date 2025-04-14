@@ -23,4 +23,7 @@ export const zh: Record<TranslationKeys, string> = {
   somethingWentWrong: '出错了 :(',
   deleteAllClipItems: '删除所有剪贴板条目',
   openDatabaseDir: '打开数据库目录',
+  clearClipboard: '清空剪切板',
+  showWindow: '显示窗口',
+  quit: '退出',
 };

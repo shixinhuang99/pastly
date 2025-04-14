@@ -5,6 +5,7 @@ import { Select } from '~/components';
 import { SelectIconTrigger } from '~/components/one-select';
 import { Langs } from '~/consts';
 import { storage } from '~/utils/storage';
+import { changeTrayMenuLanguage } from '~/utils/tray';
 import { SettingsDialog } from './settings';
 import { ThemeToggle } from './theme-toggle';
 
@@ -31,11 +32,12 @@ function ChangeLanguageButton() {
   const { i18n } = useTranslation();
   const [value, setValue] = useState(i18n.language);
 
-  const handleLanguageChange = (v: string) => {
+  const handleLanguageChange = async (v: string) => {
+    await i18n.changeLanguage(v);
     setValue(v);
-    i18n.changeLanguage(v);
     storage.setLanguage(v);
     document.documentElement.lang = v;
+    await changeTrayMenuLanguage();
   };
 
   return (
