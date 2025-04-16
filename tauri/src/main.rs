@@ -21,6 +21,14 @@ fn main() {
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_clipboard::init())
 		.plugin(tauri_plugin_sql::Builder::default().build())
+		.plugin(tauri_plugin_single_instance::init(|app, _, _| {
+			if let Some(ww) = app.get_webview_window("main") {
+				if ww.is_minimized().is_ok_and(|v| v) {
+					let _ = ww.unminimize();
+				}
+				let _ = ww.set_focus();
+			}
+		}))
 		.build(tauri::generate_context!())
 		.expect("Failed to launch app");
 
