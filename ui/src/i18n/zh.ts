@@ -27,4 +27,6 @@ export const zh: Record<TranslationKeys, string> = {
   showWindow: '显示窗口',
   quit: '退出',
   pickDate: '选择日期',
+  autoStart: '开机启动',
+  autoStartTray: '开机启动',
 };

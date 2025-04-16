@@ -1,10 +1,17 @@
-import { Menu, MenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu';
+import {
+  CheckMenuItem,
+  Menu,
+  MenuItem,
+  PredefinedMenuItem,
+} from '@tauri-apps/api/menu';
 import { TrayIcon } from '@tauri-apps/api/tray';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+import * as AutoStart from '@tauri-apps/plugin-autostart';
 import { clear, writeText } from 'tauri-plugin-clipboard-api';
 import { toastError } from '~/components';
 import { t } from '~/i18n';
 import type { TextClipItem } from '~/types';
+import { emitter } from '~/utils/event-emitter';
 
 let tray: TrayIcon | null = null;
 let menu: Menu | null = null;
@@ -14,6 +21,7 @@ const PreDefMenuItemId = {
   Clear: 'clear',
   ShowWindow: 'showWindow',
   Quit: 'quit',
+  autoStart: 'autoStart',
 } as const;
 
 export async function initTrayMenu(clipItems: TextClipItem[]) {
@@ -37,6 +45,15 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     await menu.append(noDataItem);
   }
   const speratorItem = await PredefinedMenuItem.new({ item: 'Separator' });
+  const isAutoStartEnabled = await AutoStart.isEnabled();
+  const autoStartItem = await CheckMenuItem.new({
+    id: PreDefMenuItemId.autoStart,
+    text: t('autoStartTray'),
+    checked: isAutoStartEnabled,
+    action() {
+      emitter.emit('toggle-auto-start');
+    },
+  });
   const clearClipboardItem = await MenuItem.new({
     id: PreDefMenuItemId.Clear,
     text: t('clearClipboard'),
@@ -66,6 +83,7 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
   });
   await menu.append([
     speratorItem,
+    autoStartItem,
     clearClipboardItem,
     showWindowItem,
     quitItem,
@@ -121,6 +139,8 @@ export async function changeTrayMenuLanguage() {
       await item.setText(t('showWindow'));
     } else if (item.id === PreDefMenuItemId.Quit) {
       await item.setText(t('quit'));
+    } else if (item.id === PreDefMenuItemId.autoStart) {
+      await item.setText(t('autoStart'));
     }
   }
 }
@@ -149,4 +169,15 @@ export async function updateTrayMenuItems(clipItems: TextClipItem[]) {
     });
     await menu.insert(noDataItem, 0);
   }
+}
+
+export async function updateAutoStartItemChecked(v: boolean) {
+  if (!tray || !menu) {
+    return;
+  }
+  const autoStartItem = await menu.get(PreDefMenuItemId.autoStart);
+  if (!autoStartItem) {
+    return;
+  }
+  await (autoStartItem as CheckMenuItem).setChecked(v);
 }

@@ -6,8 +6,12 @@ import { ExternalLink, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
 import { settingsAtom } from '~/atom/primitive';
-import { updateSettingsAtom } from '~/atom/settings';
-import { Button, InputNumber, TooltipButton } from '~/components';
+import {
+  handleTrayToggleAutoStartAtom,
+  initSettingsAtom,
+  updateSettingsAtom,
+} from '~/atom/settings';
+import { Button, InputNumber, Switch, TooltipButton } from '~/components';
 import {
   Dialog,
   DialogContent,
@@ -19,11 +23,21 @@ import {
 import { Form, FormItem } from '~/components/simple-form';
 import { DB_NAME } from '~/consts';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
+import { emitter } from '~/utils/event-emitter';
 
 export function SettingsDialog() {
   const settings = useAtomValue(settingsAtom);
   const updateSettings = useSetAtom(updateSettingsAtom);
   const t = useT();
+  const initSettings = useSetAtom(initSettingsAtom);
+  const handleTrayToggleAutoStart = useSetAtom(handleTrayToggleAutoStartAtom);
+
+  useOnceEffect(() => {
+    initSettings();
+    emitter.on('toggle-auto-start', () => {
+      handleTrayToggleAutoStart();
+    });
+  });
 
   return (
     <Dialog>
@@ -37,7 +51,7 @@ export function SettingsDialog() {
           <DialogTitle>{t('settings')}</DialogTitle>
           <DialogDescription>{t('applicationSettings')}</DialogDescription>
         </DialogHeader>
-        <div className="h-[270px] px-1">
+        <div className="h-[310px] px-1">
           <Form value={settings} onChange={updateSettings}>
             <FormItem
               name="maxItemsCount"
@@ -53,8 +67,11 @@ export function SettingsDialog() {
             >
               <InputNumber minValue={1} maxValue={30} />
             </FormItem>
+            <FormItem name="autoStart" label={t('autoStart')} comp="switch">
+              <Switch />
+            </FormItem>
           </Form>
-          <div className="mt-4 flex flex-col items-center">
+          <div className="mt-1 flex flex-col items-center">
             <div className="text-muted-foreground h-9 flex items-center">
               {t('version')}: {PKG_VERSION}
             </div>

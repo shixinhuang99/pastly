@@ -714,20 +714,12 @@ body {
   top: 50%;
 }
 
-.right-0 {
-  right: 0px;
-}
-
 .z-10 {
   z-index: 10;
 }
 
 .z-50 {
   z-index: 50;
-}
-
-.z-20 {
-  z-index: 20;
 }
 
 .m-0 {
@@ -748,12 +740,12 @@ body {
   margin-left: auto;
 }
 
-.mt-2 {
-  margin-top: 0.5rem;
+.mt-1 {
+  margin-top: 0.25rem;
 }
 
-.mt-4 {
-  margin-top: 1rem;
+.mt-2 {
+  margin-top: 0.5rem;
 }
 
 .block {
@@ -839,8 +831,8 @@ body {
   height: 1px;
 }
 
-.h-\[270px\] {
-  height: 270px;
+.h-\[310px\] {
+  height: 310px;
 }
 
 .h-\[50px\] {
@@ -915,12 +907,12 @@ body {
   width: 2.25rem;
 }
 
-.w-\[1px\] {
-  width: 1px;
+.w-\[150px\] {
+  width: 150px;
 }
 
-.w-\[240px\] {
-  width: 240px;
+.w-\[1px\] {
+  width: 1px;
 }
 
 .w-\[400px\] {
@@ -941,22 +933,6 @@ body {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-\[140px\] {
-  width: 140px;
-}
-
-.w-\[150px\] {
-  width: 150px;
-}
-
-.w-\[160px\] {
-  width: 160px;
-}
-
-.w-\[180px\] {
-  width: 180px;
 }
 
 .min-w-10 {
@@ -1082,10 +1058,6 @@ body {
 
 .items-center {
   align-items: center;
-}
-
-.justify-start {
-  justify-content: flex-start;
 }
 
 .justify-center {
@@ -2191,14 +2163,6 @@ body {
   background-color: rgb(250 204 21 / var(--tw-bg-opacity, 1));
 }
 
-.hover\:fill-red-500:hover {
-  fill: #ef4444;
-}
-
-.hover\:stroke-red-500:hover {
-  stroke: #ef4444;
-}
-
 .hover\:text-accent-foreground:hover {
   color: hsl(var(--accent-foreground));
 }
@@ -2209,11 +2173,6 @@ body {
 
 .hover\:text-primary-foreground:hover {
   color: hsl(var(--primary-foreground));
-}
-
-.hover\:text-red-500:hover {
-  --tw-text-opacity: 1;
-  color: rgb(239 68 68 / var(--tw-text-opacity, 1));
 }
 
 .hover\:underline:hover {

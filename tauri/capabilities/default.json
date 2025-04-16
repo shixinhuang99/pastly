@@ -21,6 +21,7 @@
     "clipboard:write-all",
     "clipboard:monitor-all",
     "sql:default",
-    "sql:allow-execute"
+    "sql:allow-execute",
+    "autostart:default"
   ]
 }

@@ -25,6 +25,8 @@ export const en = {
   showWindow: 'Show Window',
   quit: 'Quit',
   pickDate: 'Pick a date',
+  autoStart: 'Auto start',
+  autoStartTray: 'Auto Start',
 };
 
 export type TranslationKeys = keyof typeof en;

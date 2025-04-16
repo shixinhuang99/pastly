@@ -22,6 +22,7 @@ export type ClipItem =
 export interface Settings {
   maxItemsCount: number;
   trayItemsCount: number;
+  autoStart: boolean;
 }
 
 export type ClipItemDBSchema = {
