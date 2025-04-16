@@ -26,4 +26,5 @@ export const zh: Record<TranslationKeys, string> = {
   clearClipboard: '清空剪切板',
   showWindow: '显示窗口',
   quit: '退出',
+  pickDate: '选择日期',
 };

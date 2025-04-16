@@ -1,4 +1,5 @@
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
+import { isSameDay } from 'date-fns';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Copy, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
@@ -27,11 +28,12 @@ import {
   TooltipButton,
   toastError,
 } from '~/components';
+import { DatePicker } from '~/components/date-picker';
 import { VirtualList, type VirtualListRef } from '~/components/virtual-list';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
 import type { BaseClipItem, ClipItem, ClipItemTypes } from '~/types';
 import { cn, scrollBarVariants } from '~/utils/cn';
-import { fmtDate, fmtDateDistance } from '~/utils/common';
+import { fmtDateDistance, fmtFullDate } from '~/utils/common';
 
 function createClipItem<T extends ClipItemTypes, P>(
   type: T,
@@ -55,6 +57,7 @@ export function List() {
   const setWriteToClipboardPending = useSetAtom(writeToClipboardPendingAtom);
   const virtualListRef = useRef<VirtualListRef>(null);
   const loading = useBoolean();
+  const [date, setDate] = useState<Date>();
 
   useOnceEffect(async () => {
     try {
@@ -89,16 +92,27 @@ export function List() {
   });
 
   const filteredClipItems = useMemo(() => {
-    return clipItems.filter((item) => {
-      if (item.type === 'text') {
-        return item.value.includes(deferredSearch);
-      }
-      if (item.type === 'files') {
-        return item.value.some((file) => file.includes(deferredSearch));
-      }
-      return deferredSearch.length <= 0;
-    });
-  }, [deferredSearch, clipItems]);
+    let result = clipItems;
+    if (date) {
+      result = result.filter((item) => isSameDay(date, item.date));
+    }
+    if (deferredSearch) {
+      result = result.filter((item) => {
+        if (item.type === 'text') {
+          return item.value.includes(deferredSearch);
+        }
+        if (item.type === 'files') {
+          return item.value.some((file) => file.includes(deferredSearch));
+        }
+        return false;
+      });
+    }
+    return result;
+  }, [deferredSearch, clipItems, date]);
+
+  const clipItemDates = useMemo(() => {
+    return clipItems.map((item) => item.date);
+  }, [clipItems]);
 
   if (loading.value) {
     return (
@@ -117,7 +131,14 @@ export function List() {
           onValueChange={setSearch}
           placeholder={t('searchByKeyword')}
         />
-        <div>{t('itemsCount', { count: clipItems.length })}</div>
+        <DatePicker
+          value={date}
+          onChange={setDate}
+          shouldDisabled={(v) => {
+            return !clipItemDates.some((vv) => isSameDay(vv, v));
+          }}
+        />
+        <div>{t('itemsCount', { count: filteredClipItems.length })}</div>
       </div>
       <VirtualList
         ref={virtualListRef}
@@ -143,7 +164,7 @@ function Item(props: { clipItem: ClipItem }) {
   const updateClipItem = useSetAtom(updateClipItemAtom);
 
   const { id, type, value, date } = clipItem;
-  const fullDate = fmtDate(date);
+  const fullDate = fmtFullDate(date);
 
   const handleReealInDirError = (path: string) => {
     if (type !== 'files') {

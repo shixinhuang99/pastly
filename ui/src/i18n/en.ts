@@ -24,6 +24,7 @@ export const en = {
   clearClipboard: 'Clear Clipboard',
   showWindow: 'Show Window',
   quit: 'Quit',
+  pickDate: 'Pick a date',
 };
 
 export type TranslationKeys = keyof typeof en;

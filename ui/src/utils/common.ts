@@ -3,18 +3,22 @@ import { enUS, zhCN } from 'date-fns/locale';
 import { Langs } from '~/consts';
 import type { ClipItem, TextClipItem } from '~/types';
 
-export function fmtDate(v: number): string {
+export function fmtFullDate(v: number): string {
   return format(v, 'yyyy/MM/dd HH:mm:ss');
 }
 
-export function fmtDateDistance(v: number, locale: string): string {
+export function fmtDateDistance(v: number, lang: string): string {
   return formatDistanceToNow(v, {
     addSuffix: true,
-    locale: i18nLangToDateFnsLang(locale),
+    locale: getDateFnsLocaleFromI18nLang(lang),
   });
 }
 
-function i18nLangToDateFnsLang(lang: string) {
+export function fmtShortDate(v: Date, lang: string) {
+  return format(v, 'PP', { locale: getDateFnsLocaleFromI18nLang(lang) });
+}
+
+export function getDateFnsLocaleFromI18nLang(lang: string) {
   if (lang === Langs.Zh) {
     return zhCN;
   }

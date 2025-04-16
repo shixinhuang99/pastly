@@ -1,7 +1,7 @@
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { Settings } from 'lucide-react';
+import { SettingsIcon } from 'lucide-react';
 import { ExternalLink, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
@@ -29,7 +29,7 @@ export function SettingsDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <TooltipButton tooltip={t('settings')}>
-          <Settings />
+          <SettingsIcon />
         </TooltipButton>
       </DialogTrigger>
       <DialogContent className="w-[400px] rounded-lg">
