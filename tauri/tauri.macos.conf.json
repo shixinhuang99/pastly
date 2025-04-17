@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "windows": [
+      {
+        "title": "Pastly",
+        "width": 500,
+        "minWidth": 500,
+        "height": 700,
+        "minHeight": 700,
+        "resizable": false,
+        "center": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
+      }
+    ],
+    "trayIcon": {
+      "iconPath": "../assets/tray_32x32.png",
+      "iconAsTemplate": true,
+      "tooltip": "Pastly"
+    },
+    "security": {
+      "csp": null
+    }
+  }
+}

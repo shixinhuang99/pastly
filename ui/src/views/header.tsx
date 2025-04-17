@@ -13,7 +13,7 @@ export function Header() {
   return (
     <div
       className="w-full h-11 flex justify-center items-center px-4 py-1 border-b border-border/50 dark:border-border relative"
-      data-tauri-drag-region
+      data-tauri-drag-region={PLATFORM === 'darwin' ? true : undefined}
     >
       <div className="flex items-center gap-1 p-3">
         <img className="size-8" src="/icon.ico" alt="app logo icon" />

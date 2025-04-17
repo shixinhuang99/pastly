@@ -6,32 +6,9 @@
     "devUrl": "http://localhost:4000",
     "frontendDist": "../ui/dist"
   },
-  "app": {
-    "windows": [
-      {
-        "title": "Pastly",
-        "width": 500,
-        "minWidth": 500,
-        "height": 700,
-        "minHeight": 700,
-        "resizable": false,
-        "center": true,
-        "titleBarStyle": "Overlay",
-        "hiddenTitle": true
-      }
-    ],
-    "trayIcon": {
-      "iconPath": "../assets/tray_32x32.png",
-      "iconAsTemplate": true,
-      "tooltip": "Pastly"
-    },
-    "security": {
-      "csp": null
-    }
-  },
   "bundle": {
     "active": true,
-    "targets": ["dmg"],
+    "targets": ["dmg", "nsis"],
     "icon": [
       "../assets/32x32.png",
       "../assets/128x128.png",

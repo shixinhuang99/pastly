@@ -54,10 +54,16 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
       emitter.emit('toggle-auto-start');
     },
   });
+  const genAccelerator = (v: string) => {
+    if (PLATFORM === 'win32') {
+      return undefined;
+    }
+    return v;
+  };
   const clearClipboardItem = await MenuItem.new({
     id: PreDefMenuItemId.Clear,
     text: t('clearClipboard'),
-    accelerator: 'Cmd+D',
+    accelerator: genAccelerator('Cmd+D'),
     async action() {
       await clear();
     },
@@ -65,7 +71,7 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
   const showWindowItem = await MenuItem.new({
     id: PreDefMenuItemId.ShowWindow,
     text: t('showWindow'),
-    accelerator: 'Cmd+W',
+    accelerator: genAccelerator('Cmd+W'),
     async action() {
       const ww = getCurrentWebviewWindow();
       await ww.show();
@@ -75,7 +81,7 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
   const quitItem = await MenuItem.new({
     id: PreDefMenuItemId.Quit,
     text: t('quit'),
-    accelerator: 'Cmd+Q',
+    accelerator: genAccelerator('Cmd+Q'),
     async action() {
       const ww = getCurrentWebviewWindow();
       await ww.destroy();
@@ -96,7 +102,7 @@ async function createClipMenuItems(
 ): Promise<MenuItem[]> {
   let index = 1;
   const genAccelerator = () => {
-    if (index < 1 || index > 10) {
+    if (index < 1 || index > 10 || PLATFORM === 'win32') {
       return undefined;
     }
     return `Cmd+${index === 10 ? 0 : index}`;
