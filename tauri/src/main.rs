@@ -1,6 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::{Manager, RunEvent};
+#[cfg(target_os = "windows")]
+use tauri::tray::{MouseButton, TrayIconEvent};
+use tauri::{AppHandle, Manager, RunEvent};
 
 fn main() {
 	let app = tauri::Builder::default()
@@ -35,11 +37,28 @@ fn main() {
 	app.run(|app_handle, event| {
 		#[cfg(target_os = "macos")]
 		if let RunEvent::Reopen { .. } = event {
-			let Some(window) = app_handle.get_webview_window("main") else {
-				return;
-			};
-			let _ = window.show();
-			let _ = window.set_focus();
+			show_main_window(app_handle);
+		}
+
+		#[cfg(target_os = "windows")]
+		if let RunEvent::TrayIconEvent(tray_icon_event) = event {
+			match tray_icon_event {
+				TrayIconEvent::Click { button, .. }
+				| TrayIconEvent::DoubleClick { button, .. } => {
+					if let MouseButton::Left = button {
+						show_main_window(app_handle);
+					}
+				}
+				_ => (),
+			}
 		}
 	});
+}
+
+fn show_main_window(app_handle: &AppHandle) {
+	let Some(window) = app_handle.get_webview_window("main") else {
+		return;
+	};
+	let _ = window.show();
+	let _ = window.set_focus();
 }
