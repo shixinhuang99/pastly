@@ -22,6 +22,16 @@
     "macOS": {
       "minimumSystemVersion": "12.0.1",
       "signingIdentity": null
+    },
+    "useLocalToolsDir": true,
+    "windows": {
+      "allowDowngrades": true,
+      "webviewInstallMode": {
+        "type": "skip"
+      },
+      "nsis": {
+        "installerIcon": "../assets/icon.ico"
+      }
     }
   }
 }
