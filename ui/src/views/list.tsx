@@ -65,7 +65,7 @@ export function List() {
       await initClipItems();
       onSomethingUpdate(async (updateTypes) => {
         let newClipItem: ClipItem | null = null;
-        if (updateTypes.files) {
+        if (updateTypes.files && PLATFORM !== 'linux') {
           const files = await readFiles();
           newClipItem = createClipItem('files', files);
         } else if (updateTypes.image) {

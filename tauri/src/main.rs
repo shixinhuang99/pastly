@@ -1,8 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::Manager;
 #[cfg(target_os = "windows")]
 use tauri::tray::{MouseButton, TrayIconEvent};
-use tauri::{AppHandle, Manager, RunEvent};
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+use tauri::{AppHandle, RunEvent};
 
 fn main() {
 	let app = tauri::Builder::default()
@@ -34,19 +36,19 @@ fn main() {
 		.build(tauri::generate_context!())
 		.expect("Failed to launch app");
 
-	app.run(|app_handle, event| {
+	app.run(|_app_handle, _event| {
 		#[cfg(target_os = "macos")]
-		if let RunEvent::Reopen { .. } = event {
-			show_main_window(app_handle);
+		if let RunEvent::Reopen { .. } = _event {
+			show_main_window(_app_handle);
 		}
 
 		#[cfg(target_os = "windows")]
-		if let RunEvent::TrayIconEvent(tray_icon_event) = event {
+		if let RunEvent::TrayIconEvent(tray_icon_event) = _event {
 			match tray_icon_event {
 				TrayIconEvent::Click { button, .. }
 				| TrayIconEvent::DoubleClick { button, .. } => {
 					if let MouseButton::Left = button {
-						show_main_window(app_handle);
+						show_main_window(_app_handle);
 					}
 				}
 				_ => (),
@@ -55,6 +57,7 @@ fn main() {
 	});
 }
 
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 fn show_main_window(app_handle: &AppHandle) {
 	let Some(window) = app_handle.get_webview_window("main") else {
 		return;

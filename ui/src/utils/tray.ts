@@ -55,7 +55,7 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     },
   });
   const genAccelerator = (v: string) => {
-    if (PLATFORM === 'win32') {
+    if (PLATFORM === 'win32' || PLATFORM === 'linux') {
       return undefined;
     }
     return v;
