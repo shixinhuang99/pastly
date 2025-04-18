@@ -1,4 +1,4 @@
-import { appDataDir, join } from '@tauri-apps/api/path';
+import { appConfigDir, appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { SettingsIcon } from 'lucide-react';
@@ -124,7 +124,8 @@ function OpenDatabaseDirButton() {
   const [dbPath, setDbPath] = useState<string | null>(null);
 
   useOnceEffect(async () => {
-    const dir = await appDataDir();
+    const dir =
+      PLATFORM === 'linux' ? await appConfigDir() : await appDataDir();
     const path = await join(dir, DB_NAME);
     setDbPath(path);
   });
