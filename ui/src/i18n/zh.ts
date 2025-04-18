@@ -29,4 +29,9 @@ export const zh: Record<TranslationKeys, string> = {
   pickDate: '选择日期',
   autoStart: '开机启动',
   autoStartTray: '开机启动',
+  general: '通用',
+  sync: '同步',
+  port: '端口',
+  server: '服务器',
+  name: '名称',
 };

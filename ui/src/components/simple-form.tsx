@@ -46,7 +46,8 @@ type CompType =
   | 'switch'
   | 'slider'
   | 'select'
-  | 'checkbox';
+  | 'checkbox'
+  | 'input';
 
 export function FormItem(
   props: React.PropsWithChildren<{
@@ -98,6 +99,12 @@ export function FormItem(
           onChange({ [name]: !!v });
         },
       },
+      input: {
+        value: value[name],
+        onChange: (e: React.FormEvent<HTMLInputElement>) => {
+          onChange({ [name]: e.currentTarget.value });
+        },
+      },
     };
     const compProps = compPropsMap[comp] || {};
     return { name, ...compProps };
@@ -120,6 +127,21 @@ export function FormItem(
         {children}
       </Slot>
       {suffix}
+    </div>
+  );
+}
+
+export function FormItemOnlyStyle(
+  props: React.PropsWithChildren<{
+    label?: React.ReactNode;
+  }>,
+) {
+  const { children, label } = props;
+
+  return (
+    <div className="flex items-center gap-2 min-h-9">
+      <Label className="flex-shrink-0">{label}:</Label>
+      {children}
     </div>
   );
 }

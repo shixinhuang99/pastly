@@ -23,6 +23,10 @@ export interface Settings {
   maxItemsCount: number;
   trayItemsCount: number;
   autoStart: boolean;
+  server: boolean;
+  id: string;
+  name: string;
+  port: number;
 }
 
 export type ClipItemDBSchema = {

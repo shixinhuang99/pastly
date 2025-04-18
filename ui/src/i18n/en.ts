@@ -27,6 +27,11 @@ export const en = {
   pickDate: 'Pick a date',
   autoStart: 'Auto start',
   autoStartTray: 'Auto Start',
+  general: 'General',
+  sync: 'Sync',
+  port: 'Port',
+  server: 'Server',
+  name: 'Name',
 };
 
 export type TranslationKeys = keyof typeof en;

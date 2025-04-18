@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod sync;
+
 use tauri::Manager;
 #[cfg(target_os = "windows")]
 use tauri::tray::{MouseButton, TrayIconEvent};
@@ -21,7 +23,11 @@ fn main() {
 
 			Ok(())
 		})
-		.invoke_handler(tauri::generate_handler![])
+		.invoke_handler(tauri::generate_handler![
+			get_host_name,
+			start_server,
+			shutdown_server
+		])
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_clipboard::init())
 		.plugin(tauri_plugin_sql::Builder::default().build())
@@ -64,4 +70,29 @@ fn show_main_window(app_handle: &AppHandle) {
 	};
 	let _ = window.show();
 	let _ = window.set_focus();
+}
+
+#[tauri::command]
+fn get_host_name() -> String {
+	hostname::get()
+		.ok()
+		.map(|osstr| osstr.to_string_lossy().to_string())
+		.unwrap_or_default()
+}
+
+#[tauri::command]
+async fn start_server(
+	id: String,
+	name: String,
+	port: u16,
+) -> Result<(), String> {
+	if let Err(err) = sync::start_server(id, name, port).await {
+		return Err(err.to_string());
+	}
+	Ok(())
+}
+
+#[tauri::command]
+async fn shutdown_server() {
+	sync::shutdown_server().await;
 }

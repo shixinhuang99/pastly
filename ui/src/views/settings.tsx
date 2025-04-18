@@ -1,6 +1,6 @@
 import { appConfigDir, appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { SettingsIcon } from 'lucide-react';
 import { ExternalLink, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -11,7 +11,13 @@ import {
   initSettingsAtom,
   updateSettingsAtom,
 } from '~/atom/settings';
-import { Button, InputNumber, Switch, TooltipButton } from '~/components';
+import {
+  Button,
+  Input,
+  InputNumber,
+  Switch,
+  TooltipButton,
+} from '~/components';
 import {
   Dialog,
   DialogContent,
@@ -20,17 +26,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/shadcn/dialog';
-import { Form, FormItem } from '~/components/simple-form';
+import { Form, FormItem, FormItemOnlyStyle } from '~/components/simple-form';
 import { DB_NAME } from '~/consts';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
+import { ipc } from '~/ipc';
+import { cn, scrollBarVariants } from '~/utils/cn';
 import { emitter } from '~/utils/event-emitter';
 
 export function SettingsDialog() {
-  const settings = useAtomValue(settingsAtom);
+  const [settings, setSettings] = useAtom(settingsAtom);
   const updateSettings = useSetAtom(updateSettingsAtom);
   const t = useT();
   const initSettings = useSetAtom(initSettingsAtom);
   const handleTrayToggleAutoStart = useSetAtom(handleTrayToggleAutoStartAtom);
+  const serverPending = useBoolean();
 
   useOnceEffect(() => {
     initSettings();
@@ -38,6 +47,20 @@ export function SettingsDialog() {
       handleTrayToggleAutoStart();
     });
   });
+
+  const handleServerSwitch = async (checked: boolean) => {
+    serverPending.on();
+    try {
+      if (checked) {
+        await ipc.startServer(settings.id, settings.port, settings.name);
+      } else {
+        await ipc.shutdownServer();
+      }
+      setSettings({ ...settings, server: checked });
+    } finally {
+      serverPending.off();
+    }
+  };
 
   return (
     <Dialog>
@@ -51,8 +74,14 @@ export function SettingsDialog() {
           <DialogTitle>{t('settings')}</DialogTitle>
           <DialogDescription>{t('applicationSettings')}</DialogDescription>
         </DialogHeader>
-        <div className="h-[310px] px-1">
+        <div
+          className={cn(
+            'h-[310px] px-1 overflow-y-auto overflow-x-hidden',
+            scrollBarVariants(),
+          )}
+        >
           <Form value={settings} onChange={updateSettings}>
+            <div className="text-center text-lg">{t('general')}</div>
             <FormItem
               name="maxItemsCount"
               label={t('maxItemsCount')}
@@ -69,6 +98,20 @@ export function SettingsDialog() {
             </FormItem>
             <FormItem name="autoStart" label={t('autoStart')} comp="switch">
               <Switch />
+            </FormItem>
+            <div className="text-center text-lg">{t('sync')}</div>
+            <FormItemOnlyStyle label={t('server')}>
+              <Switch
+                checked={settings.server}
+                onCheckedChange={handleServerSwitch}
+                disabled={serverPending.value}
+              />
+            </FormItemOnlyStyle>
+            <FormItem name="name" label={t('name')} comp="input">
+              <Input minLength={1} maxLength={20} />
+            </FormItem>
+            <FormItem name="port" label={t('port')} comp="input-number">
+              <InputNumber minValue={1024} maxValue={49151} />
             </FormItem>
           </Form>
           <div className="mt-1 flex flex-col items-center">
