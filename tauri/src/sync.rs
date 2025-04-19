@@ -1,13 +1,38 @@
 use std::sync::Mutex;
 
 use anyhow::Result;
-use mdns_sd::{DaemonStatus, ServiceDaemon, ServiceEvent, ServiceInfo};
-use tauri::async_runtime::spawn;
+use mdns_sd::{DaemonStatus, ServiceDaemon, ServiceInfo};
+use serde::Serialize;
+use tauri::{AppHandle, Emitter, async_runtime::spawn};
 
 static MDNS: Mutex<Option<ServiceDaemon>> = Mutex::new(None);
 
-pub async fn start_server(id: String, name: String, port: u16) -> Result<()> {
-	start_mdns(id, name, port).await?;
+#[derive(Clone, Serialize)]
+struct DeviceInfo {
+	id: String,
+	name: String,
+	ip: String,
+	port: u16,
+}
+
+fn server_info_to_device_info(service_info: ServiceInfo) -> Option<DeviceInfo> {
+	let id = service_info.get_property_val_str("id")?.to_string();
+	let name = service_info.get_property_val_str("name")?.to_string();
+
+	println!("{:#?}", service_info.get_addresses());
+	let ip = service_info.get_hostname().to_string();
+	let port = service_info.get_port();
+
+	Some(DeviceInfo { id, name, ip, port })
+}
+
+pub async fn start_server(
+	app: AppHandle,
+	id: String,
+	name: String,
+	port: u16,
+) -> Result<()> {
+	start_mdns(app, id, name, port).await?;
 
 	println!("start server");
 
@@ -20,29 +45,49 @@ pub async fn shutdown_server() {
 	println!("shutdown server");
 }
 
-async fn start_mdns(id: String, name: String, port: u16) -> Result<()> {
+async fn start_mdns(
+	app: AppHandle,
+	id: String,
+	name: String,
+	port: u16,
+) -> Result<()> {
+	use mdns_sd::ServiceEvent::*;
+
 	let service_type = "_pastly._udp.local.";
 	let local_ip = local_ip_address::local_ip()?;
 	let host_name = format!("{}.local.", id.clone());
 
 	let service_info = ServiceInfo::new(
 		service_type,
-		&name,
+		&id.clone(),
 		&host_name,
 		local_ip,
 		port,
-		None,
+		&[("id", id), ("name", name)][..],
 	)?;
 
 	let mdns = ServiceDaemon::new()?;
 	mdns.set_multicast_loop_v4(false)?;
+	mdns.set_multicast_loop_v6(false)?;
+	mdns.enable_interface(vec!["en0"])?;
 	mdns.register(service_info)?;
 
 	let rx = mdns.browse(service_type)?;
 	spawn(async move {
 		while let Ok(event) = rx.recv_async().await {
-			if let ServiceEvent::ServiceResolved(info) = event {
-				println!("{:#?}", info);
+			match event {
+				ServiceResolved(info) => {
+					println!("mdns service resolved: {:#?}", info);
+					if let Some(device_info) = server_info_to_device_info(info)
+					{
+						app.emit("mdns_service_resolved", device_info).unwrap();
+					}
+				}
+				ServiceRemoved(_, name) => {
+					println!("mdns service removed: \"{}\"", name);
+					app.emit("mdns_service_removed", name).unwrap();
+				}
+				_ => (),
 			}
 		}
 	});

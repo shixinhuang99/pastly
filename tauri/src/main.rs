@@ -82,11 +82,12 @@ fn get_host_name() -> String {
 
 #[tauri::command]
 async fn start_server(
+	app: AppHandle,
 	id: String,
 	name: String,
 	port: u16,
 ) -> Result<(), String> {
-	if let Err(err) = sync::start_server(id, name, port).await {
+	if let Err(err) = sync::start_server(app, id, name, port).await {
 		return Err(err.to_string());
 	}
 	Ok(())

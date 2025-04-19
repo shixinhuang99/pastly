@@ -4,7 +4,7 @@ import { ipc } from '~/ipc';
 import type { Settings } from '~/types';
 import { collectTrayClipItems } from '~/utils/common';
 import { updateAutoStartItemChecked, updateTrayMenuItems } from '~/utils/tray';
-import { clipItemsAtom, settingsAtom } from './primitive';
+import { clipItemsAtom, hostNameAtom, settingsAtom } from './primitive';
 
 async function setAutoStart(autoStart: boolean) {
   const isEnabled = await AutoStart.isEnabled();
@@ -43,6 +43,7 @@ export const initSettingsAtom = atom(null, async (get, set) => {
   if (!name) {
     name = await ipc.getHostName();
     set(settingsAtom, (old) => ({ ...old, name }));
+    set(hostNameAtom, name);
   }
   if (settings.server) {
     await ipc.startServer(settings.id, settings.port, name);

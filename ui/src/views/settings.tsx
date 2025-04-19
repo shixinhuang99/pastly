@@ -1,11 +1,11 @@
 import { appConfigDir, appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { SettingsIcon } from 'lucide-react';
 import { ExternalLink, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
-import { settingsAtom } from '~/atom/primitive';
+import { hostNameAtom, settingsAtom } from '~/atom/primitive';
 import {
   handleTrayToggleAutoStartAtom,
   initSettingsAtom,
@@ -40,6 +40,7 @@ export function SettingsDialog() {
   const initSettings = useSetAtom(initSettingsAtom);
   const handleTrayToggleAutoStart = useSetAtom(handleTrayToggleAutoStartAtom);
   const serverPending = useBoolean();
+  const hostName = useAtomValue(hostNameAtom);
 
   useOnceEffect(() => {
     initSettings();
@@ -76,7 +77,7 @@ export function SettingsDialog() {
         </DialogHeader>
         <div
           className={cn(
-            'h-[310px] px-1 overflow-y-auto overflow-x-hidden',
+            'h-[310px] px-3 overflow-y-auto overflow-x-hidden border-t',
             scrollBarVariants(),
           )}
         >
@@ -108,7 +109,16 @@ export function SettingsDialog() {
               />
             </FormItemOnlyStyle>
             <FormItem name="name" label={t('name')} comp="input">
-              <Input minLength={1} maxLength={20} />
+              <Input
+                minLength={1}
+                maxLength={30}
+                placeholder={hostName}
+                onBlur={() => {
+                  if (!settings.name.trim().length) {
+                    setSettings({ ...settings, name: hostName });
+                  }
+                }}
+              />
             </FormItem>
             <FormItem name="port" label={t('port')} comp="input-number">
               <InputNumber minValue={1024} maxValue={49151} />

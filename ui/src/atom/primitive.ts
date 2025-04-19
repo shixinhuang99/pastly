@@ -18,10 +18,12 @@ export const settingsAtom = atomWithStorage<Settings>(
     trayItemsCount: 10,
     autoStart: false,
     server: false,
-    id: crypto.randomUUID(),
+    id: crypto.randomUUID().slice(0, 8),
     name: '',
     port: 42513,
   },
   undefined,
   { getOnInit: true },
 );
+
+export const hostNameAtom = atom('');
