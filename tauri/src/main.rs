@@ -94,6 +94,6 @@ async fn start_server(
 }
 
 #[tauri::command]
-async fn shutdown_server() {
-	sync::shutdown_server().await;
+async fn shutdown_server(id: String) {
+	sync::shutdown_server(id).await;
 }

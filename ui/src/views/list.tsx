@@ -32,7 +32,7 @@ import { DatePicker } from '~/components/date-picker';
 import { VirtualList, type VirtualListRef } from '~/components/virtual-list';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
 import type { BaseClipItem, ClipItem, ClipItemTypes } from '~/types';
-import { cn, scrollBarVariants } from '~/utils/cn';
+import { cardBgCls, cn, scrollBarCls } from '~/utils/cn';
 import { fmtDateDistance, fmtFullDate } from '~/utils/common';
 
 function createClipItem<T extends ClipItemTypes, P>(
@@ -233,7 +233,10 @@ function Item(props: { clipItem: ClipItem }) {
         </div>
         {type === 'text' && (
           <Textarea
-            className="overflow-y-auto overflow-x-hidden resize-none flex-1 h-px w-full p-2 bg-neutral-100 dark:bg-gray-900 rounded-none rounded-bl-lg rounded-br-lg whitespace-break-spaces overscroll-contain focus-visible:ring-0"
+            className={cn(
+              'overflow-y-auto overflow-x-hidden resize-none flex-1 h-px w-full p-2 rounded-none rounded-bl-lg rounded-br-lg whitespace-break-spaces overscroll-contain focus-visible:ring-0',
+              cardBgCls(),
+            )}
             readOnly
             value={value}
             tabIndex={-1}
@@ -250,7 +253,7 @@ function Item(props: { clipItem: ClipItem }) {
           <div
             className={cn(
               'flex-1 h-px w-full border rounded-bl-lg rounded-br-lg overflow-y-auto overflow-x-hidden',
-              scrollBarVariants(),
+              scrollBarCls(),
             )}
           >
             {value.map((file) => {

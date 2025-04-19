@@ -2,10 +2,17 @@ import { appConfigDir, appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { SettingsIcon } from 'lucide-react';
-import { ExternalLink, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
+import {
+  Computer,
+  ExternalLink,
+  FolderOpen,
+  IdCard,
+  LoaderCircle,
+  Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
-import { hostNameAtom, settingsAtom } from '~/atom/primitive';
+import { devicesAtom, hostNameAtom, settingsAtom } from '~/atom/primitive';
 import {
   handleTrayToggleAutoStartAtom,
   initSettingsAtom,
@@ -30,7 +37,7 @@ import { Form, FormItem, FormItemOnlyStyle } from '~/components/simple-form';
 import { DB_NAME } from '~/consts';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
 import { ipc } from '~/ipc';
-import { cn, scrollBarVariants } from '~/utils/cn';
+import { cardBgCls, cn, scrollBarCls } from '~/utils/cn';
 import { emitter } from '~/utils/event-emitter';
 
 export function SettingsDialog() {
@@ -41,11 +48,18 @@ export function SettingsDialog() {
   const handleTrayToggleAutoStart = useSetAtom(handleTrayToggleAutoStartAtom);
   const serverPending = useBoolean();
   const hostName = useAtomValue(hostNameAtom);
+  const setDevices = useSetAtom(devicesAtom);
 
   useOnceEffect(() => {
     initSettings();
     emitter.on('toggle-auto-start', () => {
       handleTrayToggleAutoStart();
+    });
+    ipc.listenDeviceFound((device) => {
+      setDevices((old) => [...old, device]);
+    });
+    ipc.listenDeviceRemoved((id) => {
+      setDevices((old) => old.filter((item) => item.id !== id));
     });
   });
 
@@ -55,7 +69,8 @@ export function SettingsDialog() {
       if (checked) {
         await ipc.startServer(settings.id, settings.port, settings.name);
       } else {
-        await ipc.shutdownServer();
+        await ipc.shutdownServer(settings.id);
+        setDevices([]);
       }
       setSettings({ ...settings, server: checked });
     } finally {
@@ -70,7 +85,10 @@ export function SettingsDialog() {
           <SettingsIcon />
         </TooltipButton>
       </DialogTrigger>
-      <DialogContent className="w-[400px] rounded-lg">
+      <DialogContent
+        className="w-[400px] rounded-lg"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="text-left">
           <DialogTitle>{t('settings')}</DialogTitle>
           <DialogDescription>{t('applicationSettings')}</DialogDescription>
@@ -78,11 +96,11 @@ export function SettingsDialog() {
         <div
           className={cn(
             'h-[310px] px-3 overflow-y-auto overflow-x-hidden border-t',
-            scrollBarVariants(),
+            scrollBarCls(),
           )}
         >
           <Form value={settings} onChange={updateSettings}>
-            <div className="text-center text-lg">{t('general')}</div>
+            <Title title={t('general')} />
             <FormItem
               name="maxItemsCount"
               label={t('maxItemsCount')}
@@ -100,13 +118,16 @@ export function SettingsDialog() {
             <FormItem name="autoStart" label={t('autoStart')} comp="switch">
               <Switch />
             </FormItem>
-            <div className="text-center text-lg">{t('sync')}</div>
+            <Title title={t('sync')} />
             <FormItemOnlyStyle label={t('server')}>
               <Switch
                 checked={settings.server}
                 onCheckedChange={handleServerSwitch}
                 disabled={serverPending.value}
               />
+            </FormItemOnlyStyle>
+            <FormItemOnlyStyle label={t('id')}>
+              <Input value={settings.id} disabled />
             </FormItemOnlyStyle>
             <FormItem name="name" label={t('name')} comp="input">
               <Input
@@ -124,6 +145,7 @@ export function SettingsDialog() {
               <InputNumber minValue={1024} maxValue={49151} />
             </FormItem>
           </Form>
+          <DeviceList />
           <div className="mt-1 flex flex-col items-center">
             <div className="text-muted-foreground h-9 flex items-center">
               {t('version')}: {PKG_VERSION}
@@ -200,5 +222,47 @@ function OpenDatabaseDirButton() {
       {t('openDatabaseDir')}
       <FolderOpen />
     </Button>
+  );
+}
+
+function Title(props: { title: string }) {
+  const { title } = props;
+
+  return <div className="text-center text-lg">{title}</div>;
+}
+
+function DeviceList() {
+  const devices = useAtomValue(devicesAtom);
+  const t = useT();
+
+  if (!devices.length) {
+    return null;
+  }
+
+  return (
+    <>
+      <Title title={t('connections')} />
+      <div className="w-full border rounded p-2 mt-3 flex flex-col gap-2">
+        {devices.map((device) => {
+          return (
+            <div
+              key={device.id}
+              className={cn('rounded py-1 px-3', cardBgCls())}
+            >
+              <div className="flex items-center gap-2">
+                <Computer className="size-4" />
+                <span className="truncate flex-1" title={device.name}>
+                  {device.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <IdCard className="size-4" />
+                <span className="text-muted-foreground">{device.id}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }

@@ -10,6 +10,7 @@ import * as AutoStart from '@tauri-apps/plugin-autostart';
 import { clear, writeText } from 'tauri-plugin-clipboard-api';
 import { toastError } from '~/components';
 import { t } from '~/i18n';
+import { ipc } from '~/ipc';
 import type { TextClipItem } from '~/types';
 import { emitter } from '~/utils/event-emitter';
 
@@ -83,6 +84,15 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     text: t('quit'),
     accelerator: genAccelerator('Cmd+Q'),
     async action() {
+      const settingsJson = localStorage.getItem('settings');
+      if (settingsJson) {
+        try {
+          const settings = JSON.parse(settingsJson);
+          await ipc.shutdownServer(settings.id);
+        } catch (_) {
+          //
+        }
+      }
       const ww = getCurrentWebviewWindow();
       await ww.destroy();
     },

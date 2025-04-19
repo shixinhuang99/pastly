@@ -29,9 +29,16 @@ export interface Settings {
   port: number;
 }
 
-export type ClipItemDBSchema = {
+export interface ClipItemDBSchema {
   id: string;
   type: ClipItemTypes;
   value: string;
   date: number;
-};
+}
+
+export interface DeviceInfo {
+  id: string;
+  name: string;
+  ip: string;
+  port: number;
+}

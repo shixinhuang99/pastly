@@ -31,7 +31,9 @@ export const en = {
   sync: 'Sync',
   port: 'Port',
   server: 'Server',
+  id: 'ID',
   name: 'Name',
+  connections: 'Connections',
 };
 
 export type TranslationKeys = keyof typeof en;

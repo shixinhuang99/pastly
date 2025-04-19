@@ -1,7 +1,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import { useT } from '~/hooks';
-import { cn, scrollBarVariants } from '~/utils/cn';
+import { cn, scrollBarCls } from '~/utils/cn';
 
 interface VirtualListProps<T> {
   data: T[];
@@ -60,7 +60,7 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
         ref={containerRef}
         className={cn(
           'overflow-y-scroll overflow-x-hidden',
-          scrollBarVariants(),
+          scrollBarCls(),
           className,
         )}
       >

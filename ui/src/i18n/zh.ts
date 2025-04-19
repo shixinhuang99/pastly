@@ -33,5 +33,7 @@ export const zh: Record<TranslationKeys, string> = {
   sync: '同步',
   port: '端口',
   server: '服务器',
+  id: 'ID',
   name: '名称',
+  connections: '连接',
 };

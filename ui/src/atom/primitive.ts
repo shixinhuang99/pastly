@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import type { ClipItem, Settings, ThemeCfg } from '~/types';
+import type { ClipItem, DeviceInfo, Settings, ThemeCfg } from '~/types';
 
 export const themeAtom = atom<ThemeCfg>({
   display: '',
@@ -27,3 +27,5 @@ export const settingsAtom = atomWithStorage<Settings>(
 );
 
 export const hostNameAtom = atom('');
+
+export const devicesAtom = atom<DeviceInfo[]>([]);
