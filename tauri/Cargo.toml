@@ -9,18 +9,29 @@ license = "MIT"
 publish = false
 
 [dependencies]
+aes-gcm = "0.10.3"
 anyhow = "1.0.98"
+axum = "0.8.3"
+hex = "0.4.3"
 hostname = "0.4.1"
 local-ip-address = "0.6.3"
 mdns-sd = "0.13.7"
+pbkdf2 = "0.12.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sha2 = "0.10.8"
 tauri = { version = "2.4.1", features = ["tray-icon"] }
 tauri-plugin-autostart = "2.3.0"
 tauri-plugin-clipboard = "2.1.11"
 tauri-plugin-opener = "2.2.6"
 tauri-plugin-single-instance = "2.2.3"
 tauri-plugin-sql = { version = "2.2.0", features = ["sqlite"] }
+tokio = { version = "1.44.2", features = [
+  "rt",
+  "rt-multi-thread",
+  "net",
+  "sync",
+] }
 
 [build-dependencies]
 tauri-build = { version = "2.1.1", features = [] }

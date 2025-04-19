@@ -76,7 +76,7 @@ fn show_main_window(app_handle: &AppHandle) {
 fn get_host_name() -> String {
 	hostname::get()
 		.ok()
-		.map(|osstr| osstr.to_string_lossy().to_string())
+		.map(|s| s.to_string_lossy().to_string())
 		.unwrap_or_default()
 }
 
@@ -87,10 +87,9 @@ async fn start_server(
 	name: String,
 	port: u16,
 ) -> Result<(), String> {
-	if let Err(err) = sync::start_server(app, id, name, port).await {
-		return Err(err.to_string());
-	}
-	Ok(())
+	sync::start_server(app, id, name, port, Some("1234".to_string()))
+		.await
+		.map_err(|err| err.to_string())
 }
 
 #[tauri::command]
