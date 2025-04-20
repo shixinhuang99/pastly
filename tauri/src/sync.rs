@@ -73,28 +73,41 @@ pub async fn start_server(
 	port: u16,
 	pin: Option<String>,
 ) -> Result<()> {
-	if let Some(pin) = pin.as_deref() {
-		let mut pin_lock = PIN.lock().unwrap();
-		if pin_lock.is_none()
-			|| pin_lock.as_ref().is_some_and(|old_pin| old_pin != pin)
-		{
-			*pin_lock = Some(pin.to_string());
-
-			let pin_hash = compute_pin_hash(pin);
-			let mut pin_hash_lock = PIN_HASH.lock().unwrap();
-			*pin_hash_lock = Some(pin_hash);
-
-			let aes_key = derive_aes_key(pin);
-			let mut aes_key_lock = AES_KEY.lock().unwrap();
-			*aes_key_lock = Some(aes_key);
-		}
-	}
+	set_pin_hash_and_aes_key(pin).await?;
 
 	start_mdns(app.clone(), id, name, port).await?;
 	start_http_server(app, port).await?;
 
 	#[cfg(debug_assertions)]
 	print_global_vars();
+
+	Ok(())
+}
+
+async fn set_pin_hash_and_aes_key(pin: Option<String>) -> Result<()> {
+	tokio::task::spawn_blocking(move || {
+		if let Some(pin) = pin.as_deref() {
+			let mut pin_lock = PIN.lock().unwrap();
+			if pin_lock.is_none()
+				|| pin_lock.as_ref().is_some_and(|old_pin| old_pin != pin)
+			{
+				*pin_lock = Some(pin.to_string());
+
+				let pin_hash = compute_pin_hash(pin);
+				let mut pin_hash_lock = PIN_HASH.lock().unwrap();
+				*pin_hash_lock = Some(pin_hash);
+
+				let aes_key = derive_aes_key(pin);
+				let mut aes_key_lock = AES_KEY.lock().unwrap();
+				*aes_key_lock = Some(aes_key);
+			}
+		} else {
+			let _ = PIN.lock().unwrap().take();
+			let _ = PIN_HASH.lock().unwrap().take();
+			let _ = AES_KEY.lock().unwrap().take();
+		}
+	})
+	.await?;
 
 	Ok(())
 }
@@ -328,27 +341,29 @@ pub async fn broadcast_clipboard_sync(
 	use reqwest::header::{HeaderMap, HeaderValue};
 	use std::time::Duration;
 
-	if let Some(aes_key) = AES_KEY.lock().unwrap().as_ref() {
-		let (value, iv) = encrypt_content(&clip_item.value, aes_key)?;
+	let pin_hash = PIN_HASH.lock().unwrap().clone();
+	let aes_key = *AES_KEY.lock().unwrap();
+
+	if let Some(aes_key) = aes_key {
+		let (value, iv) = encrypt_content(&clip_item.value, &aes_key)?;
 		clip_item.value = value;
 		clip_item.iv = iv;
 	}
 
-	let pin_hash_hv = {
-		if let Some(pin_hash) = PIN_HASH.lock().unwrap().as_deref() {
-			if let Ok(hv) = HeaderValue::from_str(pin_hash) {
-				Some(hv)
-			} else {
-				return Err(anyhow::anyhow!("Cannot set X-PIN-Hash"));
-			}
+	let pin_hash_hv = if let Some(pin_hash) = pin_hash {
+		if let Ok(hv) = HeaderValue::from_str(&pin_hash) {
+			Some(hv)
 		} else {
-			None
+			return Err(anyhow::anyhow!("Cannot set X-PIN-Hash"));
 		}
+	} else {
+		None
 	};
 
 	let mut builder = reqwest::Client::builder()
 		.http1_only()
-		.timeout(Duration::from_secs(20));
+		.timeout(Duration::from_secs(10));
+
 	if let Some(hv) = &pin_hash_hv {
 		let mut headers = HeaderMap::new();
 		headers.insert(PIN_HASH_HEADER, hv.clone());
@@ -360,10 +375,15 @@ pub async fn broadcast_clipboard_sync(
 	};
 
 	for device in devices {
+		println!("Ready send to {}", device.name);
 		let url = format!("http://{}:{}/broadcast", device.ip, device.port);
 		let req = client.post(url).json(&clip_item);
 		tokio::spawn(async move {
-			let _ = req.send().await;
+			if req.send().await.is_ok() {
+				println!("Send to {}", device.name);
+			} else {
+				println!("Failed send to {}", device.name);
+			}
 		});
 	}
 

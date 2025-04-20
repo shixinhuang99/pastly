@@ -44,7 +44,7 @@ export const ipc = {
     devices: DeviceInfo[],
   ) {
     return invoke('broadcast_clipboard_sync', {
-      clip_item: {
+      clipItem: {
         kind: clipItem.type,
         value: clipItem.value,
         iv: '',

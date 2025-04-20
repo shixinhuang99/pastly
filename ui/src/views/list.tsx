@@ -5,6 +5,7 @@ import { Copy, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  type UpdatedTypes,
   onSomethingUpdate,
   readFiles,
   readImageBase64,
@@ -20,11 +21,8 @@ import {
   initClipItemsAtom,
   updateClipItemAtom,
 } from '~/atom/clip-items';
-import {
-  clipItemsAtom,
-  devicesAtom,
-  writeToClipboardPendingAtom,
-} from '~/atom/primitive';
+import { getDevicesAtom } from '~/atom/devices';
+import { clipItemsAtom, writeToClipboardPendingAtom } from '~/atom/primitive';
 import {
   Button,
   SearchInput,
@@ -68,10 +66,10 @@ export function List() {
   const virtualListRef = useRef<VirtualListRef>(null);
   const loading = useBoolean();
   const [date, setDate] = useState<Date>();
-  const devices = useAtomValue(devicesAtom);
+  const getDevices = useSetAtom(getDevicesAtom);
 
   useOnceEffect(async () => {
-    onSomethingUpdate(async (updateTypes) => {
+    onSomethingUpdate(async (updateTypes: UpdatedTypes) => {
       let newClipItem: ClipItem | null = null;
       if (updateTypes.files && PLATFORM !== 'linux') {
         const files = await readFiles();
@@ -93,7 +91,7 @@ export function List() {
       setWriteToClipboardPending(false);
       window.__pastly.copiedItemId = '';
       if (newClipItem.type !== 'files') {
-        ipc.broadcastClipboardSync(newClipItem, devices);
+        ipc.broadcastClipboardSync(newClipItem, getDevices());
       }
     });
     ipc.listenClipboardSync((clipboardSync: ClipboardSync) => {
