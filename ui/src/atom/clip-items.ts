@@ -24,7 +24,7 @@ export const initClipItemsAtom = atom(null, async (get, set) => {
 
 export const addClipItemAtom = atom(
   null,
-  async (get, set, newClipItem: ClipItem, copiedItemId: string) => {
+  async (get, set, newClipItem: ClipItem, copiedItemId?: string) => {
     const clipItems = get(clipItemsAtom);
     if (copiedItemId && clipItems.length && clipItems[0].id === copiedItemId) {
       return;

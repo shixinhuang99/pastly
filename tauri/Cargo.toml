@@ -12,11 +12,13 @@ publish = false
 aes-gcm = "0.10.3"
 anyhow = "1.0.98"
 axum = "0.8.3"
+base64 = "0.22.1"
 hex = "0.4.3"
 hostname = "0.4.1"
 local-ip-address = "0.6.3"
 mdns-sd = "0.13.7"
 pbkdf2 = "0.12.2"
+reqwest = { version = "0.12.15", features = ["json"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10.8"

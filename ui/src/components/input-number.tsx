@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { cn } from '~/utils/cn';
 import { Input } from './shadcn/input';
 
 interface InputNumberProps
@@ -13,7 +12,6 @@ export function InputNumber(props: InputNumberProps) {
   const {
     minValue,
     maxValue = 2 ** 31 - 1,
-    className,
     value,
     onChange = () => {},
     ...restProps
@@ -52,7 +50,6 @@ export function InputNumber(props: InputNumberProps) {
 
   return (
     <Input
-      className={cn('dark:bg-gray-900', className)}
       type="number"
       value={draftValue}
       onChange={handleChange}

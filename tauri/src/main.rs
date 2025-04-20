@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod crypto;
 mod sync;
 
 use tauri::Manager;
@@ -7,6 +8,8 @@ use tauri::Manager;
 use tauri::tray::{MouseButton, TrayIconEvent};
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 use tauri::{AppHandle, RunEvent};
+
+use crate::sync::{ClipItem, DeviceInfo};
 
 fn main() {
 	let app = tauri::Builder::default()
@@ -26,7 +29,8 @@ fn main() {
 		.invoke_handler(tauri::generate_handler![
 			get_host_name,
 			start_server,
-			shutdown_server
+			shutdown_server,
+			broadcast_clipboard_sync,
 		])
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_clipboard::init())
@@ -65,11 +69,11 @@ fn main() {
 
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 fn show_main_window(app_handle: &AppHandle) {
-	let Some(window) = app_handle.get_webview_window("main") else {
+	let Some(ww) = app_handle.get_webview_window("main") else {
 		return;
 	};
-	let _ = window.show();
-	let _ = window.set_focus();
+	let _ = ww.show();
+	let _ = ww.set_focus();
 }
 
 #[tauri::command]
@@ -86,8 +90,9 @@ async fn start_server(
 	id: String,
 	name: String,
 	port: u16,
+	pin: Option<String>,
 ) -> Result<(), String> {
-	sync::start_server(app, id, name, port, Some("1234".to_string()))
+	sync::start_server(app, id, name, port, pin)
 		.await
 		.map_err(|err| err.to_string())
 }
@@ -95,4 +100,14 @@ async fn start_server(
 #[tauri::command]
 async fn shutdown_server(id: String) {
 	sync::shutdown_server(id).await;
+}
+
+#[tauri::command]
+async fn broadcast_clipboard_sync(
+	clip_item: ClipItem,
+	devices: Vec<DeviceInfo>,
+) -> Result<(), String> {
+	sync::broadcast_clipboard_sync(clip_item, devices)
+		.await
+		.map_err(|err| err.to_string())
 }

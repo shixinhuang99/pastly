@@ -34,6 +34,8 @@ export const en = {
   id: 'ID',
   name: 'Name',
   connections: 'Connections',
+  pin: 'PIN',
+  pinPlaceholder: 'Please input four digits',
 };
 
 export type TranslationKeys = keyof typeof en;

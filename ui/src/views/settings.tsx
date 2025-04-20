@@ -22,6 +22,7 @@ import {
   Button,
   Input,
   InputNumber,
+  PINInput,
   Switch,
   TooltipButton,
 } from '~/components';
@@ -67,7 +68,7 @@ export function SettingsDialog() {
     serverPending.on();
     try {
       if (checked) {
-        await ipc.startServer(settings.id, settings.port, settings.name);
+        await ipc.startServer(settings);
       } else {
         await ipc.shutdownServer(settings.id);
         setDevices([]);
@@ -95,12 +96,15 @@ export function SettingsDialog() {
         </DialogHeader>
         <div
           className={cn(
-            'h-[310px] px-3 overflow-y-auto overflow-x-hidden border-t',
+            'h-[400px] px-3 overflow-y-auto overflow-x-hidden border-t',
             scrollBarCls(),
           )}
         >
           <Form value={settings} onChange={updateSettings}>
             <Title title={t('general')} />
+            <FormItem name="autoStart" label={t('autoStart')} comp="switch">
+              <Switch />
+            </FormItem>
             <FormItem
               name="maxItemsCount"
               label={t('maxItemsCount')}
@@ -114,9 +118,6 @@ export function SettingsDialog() {
               comp="input-number"
             >
               <InputNumber minValue={1} maxValue={30} />
-            </FormItem>
-            <FormItem name="autoStart" label={t('autoStart')} comp="switch">
-              <Switch />
             </FormItem>
             <Title title={t('sync')} />
             <FormItemOnlyStyle label={t('server')}>
@@ -143,6 +144,9 @@ export function SettingsDialog() {
             </FormItem>
             <FormItem name="port" label={t('port')} comp="input-number">
               <InputNumber minValue={1024} maxValue={49151} />
+            </FormItem>
+            <FormItem name="pin" label={t('pin')} comp="input">
+              <PINInput maxLength={4} placeholder={t('pinPlaceholder')} />
             </FormItem>
           </Form>
           <DeviceList />

@@ -46,7 +46,7 @@ export const initSettingsAtom = atom(null, async (get, set) => {
     set(hostNameAtom, name);
   }
   if (settings.server) {
-    await ipc.startServer(settings.id, settings.port, name);
+    await ipc.startServer(settings);
   }
 });
 

@@ -20,7 +20,11 @@ import {
   initClipItemsAtom,
   updateClipItemAtom,
 } from '~/atom/clip-items';
-import { clipItemsAtom, writeToClipboardPendingAtom } from '~/atom/primitive';
+import {
+  clipItemsAtom,
+  devicesAtom,
+  writeToClipboardPendingAtom,
+} from '~/atom/primitive';
 import {
   Button,
   SearchInput,
@@ -31,7 +35,13 @@ import {
 import { DatePicker } from '~/components/date-picker';
 import { VirtualList, type VirtualListRef } from '~/components/virtual-list';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
-import type { BaseClipItem, ClipItem, ClipItemTypes } from '~/types';
+import { ipc } from '~/ipc';
+import type {
+  BaseClipItem,
+  ClipItem,
+  ClipItemTypes,
+  ClipboardSync,
+} from '~/types';
 import { cardBgCls, cn, scrollBarCls } from '~/utils/cn';
 import { fmtDateDistance, fmtFullDate } from '~/utils/common';
 
@@ -58,34 +68,41 @@ export function List() {
   const virtualListRef = useRef<VirtualListRef>(null);
   const loading = useBoolean();
   const [date, setDate] = useState<Date>();
+  const devices = useAtomValue(devicesAtom);
 
   useOnceEffect(async () => {
+    onSomethingUpdate(async (updateTypes) => {
+      let newClipItem: ClipItem | null = null;
+      if (updateTypes.files && PLATFORM !== 'linux') {
+        const files = await readFiles();
+        newClipItem = createClipItem('files', files);
+      } else if (updateTypes.image) {
+        const image = await readImageBase64();
+        newClipItem = createClipItem('image', image);
+      } else if (updateTypes.text) {
+        const text = await readText();
+        newClipItem = createClipItem('text', text);
+      }
+      if (!newClipItem) {
+        return;
+      }
+      addClipItem(newClipItem, window.__pastly.copiedItemId);
+      if (!window.__pastly.copiedItemId) {
+        virtualListRef.current?.scrollToTop();
+      }
+      setWriteToClipboardPending(false);
+      window.__pastly.copiedItemId = '';
+      if (newClipItem.type !== 'files') {
+        ipc.broadcastClipboardSync(newClipItem, devices);
+      }
+    });
+    ipc.listenClipboardSync((clipboardSync: ClipboardSync) => {
+      addClipItem(createClipItem(clipboardSync.kind, clipboardSync.value));
+    });
     try {
       loading.on();
       await initClipItems();
-      onSomethingUpdate(async (updateTypes) => {
-        let newClipItem: ClipItem | null = null;
-        if (updateTypes.files && PLATFORM !== 'linux') {
-          const files = await readFiles();
-          newClipItem = createClipItem('files', files);
-        } else if (updateTypes.image) {
-          const image = await readImageBase64();
-          newClipItem = createClipItem('image', image);
-        } else if (updateTypes.text) {
-          const text = await readText();
-          newClipItem = createClipItem('text', text);
-        }
-        if (!newClipItem) {
-          return;
-        }
-        addClipItem(newClipItem, window.__pastly.copiedItemId);
-        if (!window.__pastly.copiedItemId) {
-          virtualListRef.current?.scrollToTop();
-        }
-        setWriteToClipboardPending(false);
-        window.__pastly.copiedItemId = '';
-      });
-      startListening();
+      await startListening();
     } finally {
       loading.off();
     }

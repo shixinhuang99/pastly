@@ -36,4 +36,6 @@ export const zh: Record<TranslationKeys, string> = {
   id: 'ID',
   name: '名称',
   connections: '连接',
+  pin: 'PIN',
+  pinPlaceholder: '请输入四位数字',
 };

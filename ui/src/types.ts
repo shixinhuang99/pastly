@@ -14,9 +14,11 @@ export interface BaseClipItem<T extends ClipItemTypes, P> {
 
 export type TextClipItem = BaseClipItem<'text', string>;
 
+export type ImageClipItem = BaseClipItem<'image', string>;
+
 export type ClipItem =
   | TextClipItem
-  | BaseClipItem<'image', string>
+  | ImageClipItem
   | BaseClipItem<'files', string[]>;
 
 export interface Settings {
@@ -27,6 +29,7 @@ export interface Settings {
   id: string;
   name: string;
   port: number;
+  pin?: string;
 }
 
 export interface ClipItemDBSchema {
@@ -41,4 +44,10 @@ export interface DeviceInfo {
   name: string;
   ip: string;
   port: number;
+  pin_hash?: string;
+}
+
+export interface ClipboardSync {
+  kind: Exclude<ClipItemTypes, 'files'>;
+  value: string;
 }

@@ -17,3 +17,4 @@ export { OperationButton } from './operation-button';
 export { Select } from './one-select';
 export { CheckboxWithLabel } from './checkbox-with-label';
 export { SearchInput } from './search-input';
+export { PINInput } from './pin-input';
