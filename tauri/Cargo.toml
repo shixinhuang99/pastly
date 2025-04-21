@@ -44,4 +44,4 @@ tokio = { version = "1.44.2", features = [
 ] }
 
 [build-dependencies]
-tauri-build = "=2.1.1"
+tauri-build = { version = "=2.1.1", features = [] }
