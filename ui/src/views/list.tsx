@@ -84,7 +84,7 @@ export function List() {
       if (!newClipItem) {
         return;
       }
-      addClipItem(newClipItem, window.__pastly.copiedItemId);
+      addClipItem(newClipItem);
       if (!window.__pastly.copiedItemId) {
         virtualListRef.current?.scrollToTop();
       }

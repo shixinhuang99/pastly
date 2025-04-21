@@ -23,6 +23,9 @@ export const en = {
   version: 'Version',
   somethingWentWrong: 'Something went wrong :(',
   deleteAllClipItems: 'Delete all clip items',
+  deleteAllClipItemsConfirmTitle:
+    'Are you sure you want delete all clip items?',
+  deleteAllClipItemsConfirmDesc: 'This will clear the database',
   openDatabaseDir: 'Open database dir',
   clearClipboard: 'Clear Clipboard',
   showWindow: 'Show Window',

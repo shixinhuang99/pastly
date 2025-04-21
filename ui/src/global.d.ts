@@ -6,6 +6,6 @@ declare const PLATFORM: 'darwin' | 'win32' | 'linux';
 interface Window {
   __pastly: {
     copiedItemId: string;
-    trayClipItemIds: string[];
+    trayClipItemIds: Set<string>;
   };
 }

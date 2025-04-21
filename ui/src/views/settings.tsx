@@ -5,7 +5,6 @@ import { SettingsIcon } from 'lucide-react';
 import {
   ExternalLink,
   FolderOpen,
-  LoaderCircle,
   Moon,
   Sun,
   Trash2,
@@ -30,6 +29,7 @@ import {
 } from '~/atom/settings';
 import { applyMatchMediaAtom, initThemeAtom, setThemeAtom } from '~/atom/theme';
 import {
+  AlertDialog,
   Button,
   HoverTip,
   Input,
@@ -288,6 +288,7 @@ function DeleteAllClipItemsButton() {
   const t = useT();
   const deleteAllClipItems = useSetAtom(deleteAllClipItemsAtom);
   const pending = useBoolean();
+  const open = useBoolean();
 
   const handleClick = async () => {
     try {
@@ -295,19 +296,24 @@ function DeleteAllClipItemsButton() {
       await deleteAllClipItems();
     } finally {
       pending.off();
+      open.off();
     }
   };
 
   return (
-    <Button
-      className="text-red-500"
-      variant="link"
-      onClick={handleClick}
-      disabled={pending.value}
+    <AlertDialog
+      title={t('deleteAllClipItemsConfirmTitle')}
+      description={t('deleteAllClipItemsConfirmDesc')}
+      open={open.value}
+      onOpenChange={open.set}
+      onOk={handleClick}
+      okLoading={pending.value}
     >
-      {t('deleteAllClipItems')}
-      {pending.value ? <LoaderCircle className="animate-spin" /> : <Trash2 />}
-    </Button>
+      <Button className="text-red-500" variant="link">
+        {t('deleteAllClipItems')}
+        <Trash2 />
+      </Button>
+    </AlertDialog>
   );
 }
 

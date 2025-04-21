@@ -118,7 +118,7 @@ async function createClipMenuItems(
     return `Cmd+${index === 10 ? 0 : index}`;
   };
   const items: MenuItem[] = [];
-  window.__pastly.trayClipItemIds = [];
+  window.__pastly.trayClipItemIds.clear();
   for (const clipItem of clipItems) {
     const item = await MenuItem.new({
       id: clipItem.id,
@@ -134,7 +134,7 @@ async function createClipMenuItems(
         }
       },
     });
-    window.__pastly.trayClipItemIds.push(clipItem.id);
+    window.__pastly.trayClipItemIds.add(clipItem.id);
     index += 1;
     items.push(item);
   }
@@ -169,7 +169,7 @@ export async function updateTrayMenuItems(clipItems: TextClipItem[]) {
   for (const item of items) {
     if (
       item.id === PreDefMenuItemId.NoData ||
-      window.__pastly.trayClipItemIds.includes(item.id)
+      window.__pastly.trayClipItemIds.has(item.id)
     ) {
       await menu.remove(item);
     }

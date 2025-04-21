@@ -35,7 +35,7 @@ function main() {
 function initGlobalVar() {
   window.__pastly = {
     copiedItemId: '',
-    trayClipItemIds: [],
+    trayClipItemIds: new Set(),
   };
 }
 
