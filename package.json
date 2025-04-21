@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tauri-apps/cli": "=2.1.0",
+    "@tauri-apps/cli": "=2.5.0",
     "@types/node": "^22.14.1",
     "tree-kill": "^1.2.2",
     "tsx": "^4.19.3",

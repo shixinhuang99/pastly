@@ -9,7 +9,8 @@
         "height": 700,
         "minHeight": 700,
         "resizable": false,
-        "center": true
+        "center": true,
+        "visible": false
       }
     ],
     "trayIcon": {
