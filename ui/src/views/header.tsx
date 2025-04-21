@@ -1,14 +1,17 @@
-import { Languages } from 'lucide-react';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Select } from '~/components';
-import { SelectIconTrigger } from '~/components/one-select';
-import { Langs } from '~/consts';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { Loader, Radio, Wifi, WifiOff } from 'lucide-react';
+import { devicesAtom, serverPendingAtom, settingsAtom } from '~/atom/primitive';
+import { startAndShutdownServerAtom } from '~/atom/server';
+import { Button, TooltipButton } from '~/components';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/shadcn/popover';
+import { useT } from '~/hooks';
 import { cn } from '~/utils/cn';
-import { storage } from '~/utils/storage';
-import { changeTrayMenuLanguage } from '~/utils/tray';
+import { Devices } from './devices';
 import { SettingsDialog } from './settings';
-import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
   return (
@@ -29,39 +32,47 @@ export function Header() {
           PLATFORM === 'darwin' && 'absolute right-4',
         )}
       >
-        <ChangeLanguageButton />
-        <ThemeToggle />
+        <ServerSwtich />
         <SettingsDialog />
       </div>
     </div>
   );
 }
 
-function ChangeLanguageButton() {
-  const { i18n } = useTranslation();
-  const [value, setValue] = useState(i18n.language);
-
-  const handleLanguageChange = async (v: string) => {
-    await i18n.changeLanguage(v);
-    setValue(v);
-    storage.setLanguage(v);
-    document.documentElement.lang = v;
-    await changeTrayMenuLanguage();
-  };
+function ServerSwtich() {
+  const t = useT();
+  const settings = useAtomValue(settingsAtom);
+  const devices = useAtomValue(devicesAtom);
+  const startAndShutdownServer = useSetAtom(startAndShutdownServerAtom);
+  const serverPending = useAtomValue(serverPendingAtom);
 
   return (
-    <Select
-      trigger={
-        <SelectIconTrigger>
-          <Languages />
-        </SelectIconTrigger>
-      }
-      value={value}
-      onChange={handleLanguageChange}
-      options={[
-        { label: 'English', value: Langs.En },
-        { label: '简体中文', value: Langs.Zh },
-      ]}
-    />
+    <>
+      {serverPending ? (
+        <Button variant="ghost" size="icon">
+          <Loader className="animate-spin" />
+        </Button>
+      ) : (
+        <TooltipButton
+          tooltip={settings.server ? t('shutdownServer') : t('startServer')}
+          onClick={() => startAndShutdownServer(!settings.server)}
+        >
+          {settings.server ? <Wifi /> : <WifiOff />}
+        </TooltipButton>
+      )}
+      {settings.server && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <TooltipButton className="relative" tooltip={t('connections')}>
+              <Radio className="text-green-600" />
+              <span className="text-green-600">{devices.length}</span>
+            </TooltipButton>
+          </PopoverTrigger>
+          <PopoverContent className="p-0">
+            <Devices />
+          </PopoverContent>
+        </Popover>
+      )}
+    </>
   );
 }

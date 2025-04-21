@@ -120,8 +120,9 @@ export function FormItem(
 
   return (
     <div className="flex items-center gap-2 min-h-9">
-      <Label className="flex-shrink-0" htmlFor={name}>
-        {label}:
+      <Label className="flex-shrink-0 inline-flex items-center" htmlFor={name}>
+        {label}
+        <span>:</span>
       </Label>
       <Slot id={name} {...slotProps}>
         {children}
@@ -140,7 +141,10 @@ export function FormItemOnlyStyle(
 
   return (
     <div className="flex items-center gap-2 min-h-9">
-      <Label className="flex-shrink-0">{label}:</Label>
+      <Label className="flex-shrink-0 inline-flex items-center">
+        {label}
+        <span>:</span>
+      </Label>
       {children}
     </div>
   );

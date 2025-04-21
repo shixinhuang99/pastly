@@ -1,7 +1,10 @@
 export const en = {
   ok: 'Ok',
   cancel: 'Cancel',
-  toggleTheme: 'Toggle theme',
+  theme: 'Theme',
+  light: 'Light',
+  dark: 'Dark',
+  system: 'System',
   viewSourceCode: 'View source code',
   revealInDir: 'Reveal in {{name}}',
   finder: 'Finder',
@@ -29,13 +32,21 @@ export const en = {
   autoStartTray: 'Auto Start',
   general: 'General',
   sync: 'Sync',
+  sycnTip: 'Setting changes take effect after restarting the server',
   port: 'Port',
   server: 'Server',
   id: 'ID',
   name: 'Name',
   connections: 'Connections',
+  noConnections: 'No connections',
   pin: 'PIN',
+  pinTip:
+    'Optional, Matches only devices with the same PIN and is used for encryption',
   pinPlaceholder: 'Please input four digits',
+  appearances: 'Appearances',
+  language: 'Language',
+  startServer: 'Start server',
+  shutdownServer: 'Shutdown server',
 };
 
 export type TranslationKeys = keyof typeof en;

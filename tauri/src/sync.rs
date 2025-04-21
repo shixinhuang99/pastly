@@ -19,8 +19,8 @@ const SERVICE_TYPE: &str = "_pastly._udp.local.";
 const PIN_HASH_HEADER: &str = "X-PIN-Hash";
 
 static MDNS: Mutex<Option<ServiceDaemon>> = Mutex::new(None);
-static SHUTDOWN_HTTP_SERVER_TX: Mutex<Option<oneshot::Sender<()>>> =
-	Mutex::new(None);
+static HTTP_SERVER_TX: Mutex<Option<oneshot::Sender<()>>> = Mutex::new(None);
+static HTTP_SERVER_RX: Mutex<Option<oneshot::Receiver<()>>> = Mutex::new(None);
 static PIN: Mutex<Option<String>> = Mutex::new(None);
 static PIN_HASH: Mutex<Option<String>> = Mutex::new(None);
 static AES_KEY: Mutex<Option<Key<Aes256Gcm>>> = Mutex::new(None);
@@ -29,8 +29,12 @@ static AES_KEY: Mutex<Option<Key<Aes256Gcm>>> = Mutex::new(None);
 fn print_global_vars() {
 	println!("MDNS: {}", MDNS.lock().unwrap().is_some());
 	println!(
-		"SHUTDOWN_HTTP_SERVER_TX: {}",
-		SHUTDOWN_HTTP_SERVER_TX.lock().unwrap().is_some()
+		"HTTP_SERVER_TX: {}",
+		HTTP_SERVER_TX.lock().unwrap().is_some()
+	);
+	println!(
+		"HTTP_SERVER_RX: {}",
+		HTTP_SERVER_RX.lock().unwrap().is_some()
 	);
 	println!("PIN: {:#?}", PIN.lock().unwrap());
 	println!("PIN_HASH: {:#?}", PIN_HASH.lock().unwrap());
@@ -73,10 +77,18 @@ pub async fn start_server(
 	port: u16,
 	pin: Option<String>,
 ) -> Result<()> {
-	set_pin_hash_and_aes_key(pin).await?;
+	init_crypto(pin).await?;
 
-	start_mdns(app.clone(), id, name, port).await?;
-	start_http_server(app, port).await?;
+	let start = async || -> Result<()> {
+		start_http_server(app.clone(), port).await?;
+		start_mdns(app, id.clone(), name, port).await?;
+		Ok(())
+	};
+
+	if let Err(err) = start().await {
+		shutdown_server(id).await;
+		return Err(err);
+	}
 
 	#[cfg(debug_assertions)]
 	print_global_vars();
@@ -84,7 +96,7 @@ pub async fn start_server(
 	Ok(())
 }
 
-async fn set_pin_hash_and_aes_key(pin: Option<String>) -> Result<()> {
+async fn init_crypto(pin: Option<String>) -> Result<()> {
 	tokio::task::spawn_blocking(move || {
 		if let Some(pin) = pin.as_deref() {
 			let mut pin_lock = PIN.lock().unwrap();
@@ -94,17 +106,15 @@ async fn set_pin_hash_and_aes_key(pin: Option<String>) -> Result<()> {
 				*pin_lock = Some(pin.to_string());
 
 				let pin_hash = compute_pin_hash(pin);
-				let mut pin_hash_lock = PIN_HASH.lock().unwrap();
-				*pin_hash_lock = Some(pin_hash);
+				PIN_HASH.lock().unwrap().replace(pin_hash);
 
 				let aes_key = derive_aes_key(pin);
-				let mut aes_key_lock = AES_KEY.lock().unwrap();
-				*aes_key_lock = Some(aes_key);
+				AES_KEY.lock().unwrap().replace(aes_key);
 			}
 		} else {
-			let _ = PIN.lock().unwrap().take();
-			let _ = PIN_HASH.lock().unwrap().take();
-			let _ = AES_KEY.lock().unwrap().take();
+			PIN.lock().unwrap().take();
+			PIN_HASH.lock().unwrap().take();
+			AES_KEY.lock().unwrap().take();
 		}
 	})
 	.await?;
@@ -114,7 +124,7 @@ async fn set_pin_hash_and_aes_key(pin: Option<String>) -> Result<()> {
 
 pub async fn shutdown_server(id: String) {
 	shutdown_mdns(id).await;
-	shutdown_http_server();
+	shutdown_http_server().await;
 
 	#[cfg(debug_assertions)]
 	print_global_vars();
@@ -135,13 +145,11 @@ async fn start_mdns(
 	let local_ip = local_ip_address::local_ip()?;
 	let host_name = format!("{}.local.", &id);
 	let mut properties = vec![("id", id.clone()), ("name", name)];
-	let pin_hash = {
-		let pin_hash_lock = PIN_HASH.lock().unwrap();
-		if let Some(pin_hash) = pin_hash_lock.as_ref() {
-			properties.push(("pin_hash", pin_hash.clone()));
-		}
-		pin_hash_lock.clone()
-	};
+	let pin_hash = PIN_HASH.lock().unwrap().clone();
+
+	if let Some(pin_hash) = &pin_hash {
+		properties.push(("pin_hash", pin_hash.clone()));
+	}
 
 	let service_info = ServiceInfo::new(
 		SERVICE_TYPE,
@@ -190,8 +198,7 @@ async fn start_mdns(
 		}
 	});
 
-	let mut mdns_lock = MDNS.lock().unwrap();
-	*mdns_lock = Some(mdns);
+	MDNS.lock().unwrap().replace(mdns);
 
 	println!("start mdns");
 
@@ -201,12 +208,8 @@ async fn start_mdns(
 async fn shutdown_mdns(id: String) {
 	use mdns_sd::DaemonStatus;
 
-	let mdns = {
-		let mut mdns_lock = MDNS.lock().unwrap();
-		let Some(mdns) = mdns_lock.take() else {
-			return;
-		};
-		mdns
+	let Some(mdns) = MDNS.lock().unwrap().take() else {
+		return;
 	};
 	let _ = mdns.stop_browse(SERVICE_TYPE);
 	let full_name = format!("{}.{}", id, SERVICE_TYPE);
@@ -236,23 +239,22 @@ async fn start_http_server(app: AppHandle, port: u16) -> Result<()> {
 		return Ok(());
 	}
 
-	let (tx, rx) = oneshot::channel::<()>();
-
-	{
-		let mut tx_lock = SHUTDOWN_HTTP_SERVER_TX.lock().unwrap();
-		*tx_lock = Some(tx);
-	}
-
 	let service: Router<()> = Router::new()
 		.route("/broadcast", post(handle_broadcast))
 		.layer(Extension(app));
 	let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
 
+	let (tx, rx) = oneshot::channel::<()>();
+	let (twin_tx, twin_rx) = oneshot::channel::<()>();
+
+	HTTP_SERVER_TX.lock().unwrap().replace(tx);
+	HTTP_SERVER_RX.lock().unwrap().replace(twin_rx);
+
 	tokio::spawn(async move {
 		serve(listener, service)
 			.with_graceful_shutdown(async {
 				let _ = rx.await;
-				println!("shutdown http server");
+				twin_tx.send(()).unwrap();
 			})
 			.await
 			.unwrap();
@@ -263,15 +265,21 @@ async fn start_http_server(app: AppHandle, port: u16) -> Result<()> {
 	Ok(())
 }
 
-fn shutdown_http_server() {
-	let mut tx_lock = SHUTDOWN_HTTP_SERVER_TX.lock().unwrap();
-	if let Some(tx) = tx_lock.take() {
-		let _ = tx.send(());
+async fn shutdown_http_server() {
+	let Some(tx) = HTTP_SERVER_TX.lock().unwrap().take() else {
+		return;
 	};
+	let Some(rx) = HTTP_SERVER_RX.lock().unwrap().take() else {
+		return;
+	};
+	tx.send(()).unwrap();
+	let _ = rx.await;
+
+	println!("shutdown http server");
 }
 
 fn is_http_server_running() -> bool {
-	SHUTDOWN_HTTP_SERVER_TX.lock().unwrap().is_some()
+	HTTP_SERVER_RX.lock().unwrap().is_some()
 }
 
 #[derive(Deserialize, Serialize, Clone)]

@@ -21,8 +21,8 @@ import {
   initClipItemsAtom,
   updateClipItemAtom,
 } from '~/atom/clip-items';
-import { getDevicesAtom } from '~/atom/devices';
 import { clipItemsAtom, writeToClipboardPendingAtom } from '~/atom/primitive';
+import { getDevicesAtom } from '~/atom/server';
 import {
   Button,
   SearchInput,

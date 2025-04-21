@@ -39,24 +39,6 @@ export const initThemeAtom = atom(null, (_, set) => {
   setTheme(theme);
 });
 
-export const toggleThemeAtom = atom(null, (get, set) => {
-  const display = get(themeAtom).display;
-  const displayList: string[] = [Theme.Light, Theme.Dark, Theme.System];
-  let idx = displayList.indexOf(display);
-  if (idx < 0) {
-    idx = 0;
-  }
-  idx += 1;
-  if (idx >= displayList.length) {
-    idx = 0;
-  }
-  const newDisplay = displayList[idx];
-  const newClassName = applyTheme(newDisplay);
-  set(themeAtom, { display: newDisplay, className: newClassName });
-  storage.setTheme(newDisplay);
-  setTheme(newDisplay);
-});
-
 export const applyMatchMediaAtom = atom(null, (get, set, matches: boolean) => {
   const display = get(themeAtom).display;
   if (display !== Theme.System) {
@@ -66,4 +48,15 @@ export const applyMatchMediaAtom = atom(null, (get, set, matches: boolean) => {
   const newClassName = applyTheme(theme);
   set(themeAtom, { display, className: newClassName });
   setTheme(display);
+});
+
+export const setThemeAtom = atom(null, (get, set, choose: string) => {
+  const display = get(themeAtom).display;
+  if (display === choose) {
+    return;
+  }
+  const newClassName = applyTheme(choose);
+  set(themeAtom, { display: choose, className: newClassName });
+  storage.setTheme(choose);
+  setTheme(choose);
 });

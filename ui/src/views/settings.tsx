@@ -3,26 +3,38 @@ import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { SettingsIcon } from 'lucide-react';
 import {
-  Computer,
   ExternalLink,
   FolderOpen,
-  IdCard,
   LoaderCircle,
+  Moon,
+  Sun,
   Trash2,
+  TvMinimal,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
-import { devicesAtom, hostNameAtom, settingsAtom } from '~/atom/primitive';
+import {
+  devicesAtom,
+  hostNameAtom,
+  serverPendingAtom,
+  settingsAtom,
+  themeAtom,
+} from '~/atom/primitive';
+import { startAndShutdownServerAtom } from '~/atom/server';
 import {
   handleTrayToggleAutoStartAtom,
   initSettingsAtom,
   updateSettingsAtom,
 } from '~/atom/settings';
+import { applyMatchMediaAtom, initThemeAtom, setThemeAtom } from '~/atom/theme';
 import {
   Button,
+  HoverTip,
   Input,
   InputNumber,
   PINInput,
+  Select,
   Switch,
   TooltipButton,
 } from '~/components';
@@ -34,12 +46,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/shadcn/dialog';
+import { Tabs, TabsList, TabsTrigger } from '~/components/shadcn/tabs';
 import { Form, FormItem, FormItemOnlyStyle } from '~/components/simple-form';
-import { DB_NAME } from '~/consts';
+import { DARK_MODE_MEDIA, DB_NAME, DEFAULT_PORT, Langs, Theme } from '~/consts';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
 import { ipc } from '~/ipc';
-import { cardBgCls, cn, scrollBarCls } from '~/utils/cn';
+import { cn, scrollBarCls } from '~/utils/cn';
 import { emitter } from '~/utils/event-emitter';
+import { storage } from '~/utils/storage';
+import { changeTrayMenuLanguage } from '~/utils/tray';
+import { Devices } from './devices';
 
 export function SettingsDialog() {
   const [settings, setSettings] = useAtom(settingsAtom);
@@ -47,9 +63,21 @@ export function SettingsDialog() {
   const t = useT();
   const initSettings = useSetAtom(initSettingsAtom);
   const handleTrayToggleAutoStart = useSetAtom(handleTrayToggleAutoStartAtom);
-  const serverPending = useBoolean();
   const hostName = useAtomValue(hostNameAtom);
   const setDevices = useSetAtom(devicesAtom);
+  const initTheme = useSetAtom(initThemeAtom);
+  const applyMatchMedia = useSetAtom(applyMatchMediaAtom);
+  const startAndShutdownServer = useSetAtom(startAndShutdownServerAtom);
+  const serverPending = useAtomValue(serverPendingAtom);
+
+  useOnceEffect(() => {
+    initTheme();
+    const mql = window.matchMedia(DARK_MODE_MEDIA);
+    applyMatchMedia(mql.matches);
+    mql.addEventListener('change', (e) => {
+      applyMatchMedia(e.matches);
+    });
+  });
 
   useOnceEffect(() => {
     initSettings();
@@ -63,21 +91,6 @@ export function SettingsDialog() {
       setDevices((old) => old.filter((item) => item.id !== id));
     });
   });
-
-  const handleServerSwitch = async (checked: boolean) => {
-    serverPending.on();
-    try {
-      if (checked) {
-        await ipc.startServer(settings);
-      } else {
-        await ipc.shutdownServer(settings.id);
-        setDevices([]);
-      }
-      setSettings({ ...settings, server: checked });
-    } finally {
-      serverPending.off();
-    }
-  };
 
   return (
     <Dialog>
@@ -101,6 +114,7 @@ export function SettingsDialog() {
           )}
         >
           <Form value={settings} onChange={updateSettings}>
+            <AppearancesSettings />
             <Title title={t('general')} />
             <FormItem name="autoStart" label={t('autoStart')} comp="switch">
               <Switch />
@@ -119,12 +133,19 @@ export function SettingsDialog() {
             >
               <InputNumber minValue={1} maxValue={30} />
             </FormItem>
-            <Title title={t('sync')} />
+            <Title
+              title={
+                <>
+                  {t('sync')}
+                  <HoverTip text={t('sycnTip')} />
+                </>
+              }
+            />
             <FormItemOnlyStyle label={t('server')}>
               <Switch
                 checked={settings.server}
-                onCheckedChange={handleServerSwitch}
-                disabled={serverPending.value}
+                onCheckedChange={startAndShutdownServer}
+                disabled={serverPending}
               />
             </FormItemOnlyStyle>
             <FormItemOnlyStyle label={t('id')}>
@@ -143,14 +164,28 @@ export function SettingsDialog() {
               />
             </FormItem>
             <FormItem name="port" label={t('port')} comp="input-number">
-              <InputNumber minValue={1024} maxValue={49151} />
+              <InputNumber
+                minValue={1024}
+                maxValue={49151}
+                placeholder={DEFAULT_PORT.toString()}
+              />
             </FormItem>
-            <FormItem name="pin" label={t('pin')} comp="input">
+            <FormItem
+              name="pin"
+              label={
+                <>
+                  {t('pin')}
+                  <HoverTip className="mx-1" text={t('pinTip')} />
+                </>
+              }
+              comp="input"
+            >
               <PINInput maxLength={4} placeholder={t('pinPlaceholder')} />
             </FormItem>
           </Form>
-          <DeviceList />
-          <div className="mt-1 flex flex-col items-center">
+          {settings.server && <Title title={t('connections')} />}
+          <Devices className="border rounded mt-3" />
+          <div className="flex flex-col items-center py-3">
             <div className="text-muted-foreground h-9 flex items-center">
               {t('version')}: {PKG_VERSION}
             </div>
@@ -169,6 +204,12 @@ export function SettingsDialog() {
       </DialogContent>
     </Dialog>
   );
+}
+
+function Title(props: { title: React.ReactNode }) {
+  const { title } = props;
+
+  return <div className="flex items-center justify-center gap-1">{title}</div>;
 }
 
 function DeleteAllClipItemsButton() {
@@ -229,44 +270,52 @@ function OpenDatabaseDirButton() {
   );
 }
 
-function Title(props: { title: string }) {
-  const { title } = props;
-
-  return <div className="text-center text-lg">{title}</div>;
-}
-
-function DeviceList() {
-  const devices = useAtomValue(devicesAtom);
+function AppearancesSettings() {
   const t = useT();
+  const { i18n } = useTranslation();
+  const [value, setValue] = useState(i18n.language);
+  const theme = useAtomValue(themeAtom);
+  const setTheme = useSetAtom(setThemeAtom);
 
-  if (!devices.length) {
-    return null;
-  }
+  const handleLanguageChange = async (v: string) => {
+    await i18n.changeLanguage(v);
+    setValue(v);
+    storage.setLanguage(v);
+    document.documentElement.lang = v;
+    await changeTrayMenuLanguage();
+  };
 
   return (
     <>
-      <Title title={t('connections')} />
-      <div className="w-full border rounded p-2 mt-3 flex flex-col gap-2">
-        {devices.map((device) => {
-          return (
-            <div
-              key={device.id}
-              className={cn('rounded py-1 px-3', cardBgCls())}
-            >
-              <div className="flex items-center gap-2">
-                <Computer className="size-4" />
-                <span className="truncate flex-1" title={device.name}>
-                  {device.name}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <IdCard className="size-4" />
-                <span className="text-muted-foreground">{device.id}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <Title title={t('appearances')} />
+      <FormItemOnlyStyle label={t('language')}>
+        <Select
+          value={value}
+          onChange={handleLanguageChange}
+          options={[
+            { label: 'English', value: Langs.En },
+            { label: '简体中文', value: Langs.Zh },
+          ]}
+        />
+      </FormItemOnlyStyle>
+      <FormItemOnlyStyle label={t('theme')}>
+        <Tabs value={theme.display} onValueChange={setTheme}>
+          <TabsList>
+            <TabsTrigger value={Theme.Light}>
+              <Sun className="size-4 mr-1" />
+              {t('light')}
+            </TabsTrigger>
+            <TabsTrigger value={Theme.Dark}>
+              <Moon className="size-4 mr-1" />
+              {t('dark')}
+            </TabsTrigger>
+            <TabsTrigger value={Theme.System}>
+              <TvMinimal className="size-4 mr-1" />
+              {t('system')}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </FormItemOnlyStyle>
     </>
   );
 }
