@@ -11,7 +11,8 @@ import { clear, writeText } from 'tauri-plugin-clipboard-api';
 import { toastError } from '~/components';
 import { t } from '~/i18n';
 import { ipc } from '~/ipc';
-import type { TextClipItem } from '~/types';
+import type { Settings, TextClipItem } from '~/types';
+import { JsonParse } from '~/utils/common';
 import { emitter } from '~/utils/event-emitter';
 
 let tray: TrayIcon | null = null;
@@ -84,14 +85,9 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     text: t('quit'),
     accelerator: genAccelerator('Cmd+Q'),
     async action() {
-      const settingsJson = localStorage.getItem('settings');
-      if (settingsJson) {
-        try {
-          const settings = JSON.parse(settingsJson);
-          await ipc.shutdownServer(settings.id);
-        } catch (_) {
-          //
-        }
+      const settings = JsonParse<Settings>(localStorage.getItem('settings'));
+      if (settings) {
+        await ipc.shutdownServer(settings.id);
       }
       const ww = getCurrentWebviewWindow();
       await ww.destroy();

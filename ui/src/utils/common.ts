@@ -41,3 +41,14 @@ export function collectTrayClipItems(
   }
   return result;
 }
+
+export function JsonParse<T>(str: string | null | undefined): T | null {
+  if (!str) {
+    return null;
+  }
+  try {
+    return JSON.parse(str);
+  } catch (_) {
+    return null;
+  }
+}

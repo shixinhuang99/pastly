@@ -1,12 +1,23 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { DEFAULT_PORT, UNKNOWN_NAME } from '~/consts';
-import type { ClipItem, DeviceInfo, Settings, ThemeCfg } from '~/types';
+import { DEFAULT_PORT, Langs, Theme, UNKNOWN_NAME } from '~/consts';
+import type { ClipItem, DeviceInfo, Settings } from '~/types';
 
-export const themeAtom = atom<ThemeCfg>({
-  display: '',
-  className: '',
-});
+export const themeAtom = atomWithStorage<string>(
+  'theme',
+  Theme.System,
+  undefined,
+  {
+    getOnInit: true,
+  },
+);
+
+export const languageAtom = atomWithStorage<string>(
+  'language',
+  Langs.En,
+  undefined,
+  { getOnInit: true },
+);
 
 export const clipItemsAtom = atom<ClipItem[]>([]);
 

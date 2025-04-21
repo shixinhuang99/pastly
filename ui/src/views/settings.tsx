@@ -13,9 +13,11 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
+import { setLanguageAtom } from '~/atom/language';
 import {
   devicesAtom,
   hostNameAtom,
+  languageAtom,
   serverPendingAtom,
   settingsAtom,
   themeAtom,
@@ -54,8 +56,6 @@ import { useBoolean, useOnceEffect, useT } from '~/hooks';
 import { ipc } from '~/ipc';
 import { cn, scrollBarCls } from '~/utils/cn';
 import { emitter } from '~/utils/event-emitter';
-import { storage } from '~/utils/storage';
-import { changeTrayMenuLanguage } from '~/utils/tray';
 import { Devices } from './devices';
 
 export function SettingsDialog() {
@@ -152,16 +152,14 @@ function Title(props: { title: React.ReactNode }) {
 function AppearancesSettings() {
   const t = useT();
   const { i18n } = useTranslation();
-  const [value, setValue] = useState(i18n.language);
+  const language = useAtomValue(languageAtom);
+  const setLanguage = useSetAtom(setLanguageAtom);
   const theme = useAtomValue(themeAtom);
   const setTheme = useSetAtom(setThemeAtom);
 
   const handleLanguageChange = async (v: string) => {
     await i18n.changeLanguage(v);
-    setValue(v);
-    storage.setLanguage(v);
-    document.documentElement.lang = v;
-    await changeTrayMenuLanguage();
+    setLanguage(v);
   };
 
   return (
@@ -169,7 +167,7 @@ function AppearancesSettings() {
       <Title title={t('appearances')} />
       <FormItemOnlyStyle label={t('language')}>
         <Select
-          value={value}
+          value={language}
           onChange={handleLanguageChange}
           options={[
             { label: 'English', value: Langs.En },
@@ -178,7 +176,7 @@ function AppearancesSettings() {
         />
       </FormItemOnlyStyle>
       <FormItemOnlyStyle label={t('theme')}>
-        <Tabs value={theme.display} onValueChange={setTheme}>
+        <Tabs value={theme} onValueChange={setTheme}>
           <TabsList>
             <TabsTrigger value={Theme.Light}>
               <Sun className="size-4 mr-1" />
