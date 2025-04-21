@@ -212,7 +212,7 @@ function GeneralSettings() {
         label={t('maxItemsCount')}
         comp="input-number"
       >
-        <InputNumber minValue={1} maxValue={99999} />
+        <InputNumber minValue={1} maxValue={200000} />
       </FormItem>
       <FormItem
         name="trayItemsCount"

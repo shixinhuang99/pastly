@@ -9,7 +9,7 @@
     "url": "git+https://github.com/shixinhuang99/pastly.git"
   },
   "homepage": "https://github.com/shixinhuang99/pastly",
-  "description": "Purely local clipboard manager on macOS",
+  "description": "Clipboard manager synced across devices via local network",
   "scripts": {
     "fmt": "biome check --linter-enabled=false --write",
     "check": "biome check",

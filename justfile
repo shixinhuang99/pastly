@@ -1,4 +1,7 @@
 # required cli tools: taplo-cli,cargo-edit
+# Installation by cargo
+# cargo install taplo-cli
+# cargo install cargo-edit -f --no-default-features --features "set-version"
 
 alias pr := prepare-release
 alias pt := push-tag
