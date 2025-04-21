@@ -14,3 +14,5 @@ export const Langs = {
 export const DB_NAME = 'pastly.db';
 
 export const DEFAULT_PORT = 42513;
+
+export const UNKNOWN_NAME = 'unknown';

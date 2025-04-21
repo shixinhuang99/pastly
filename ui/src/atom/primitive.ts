@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { DEFAULT_PORT } from '~/consts';
+import { DEFAULT_PORT, UNKNOWN_NAME } from '~/consts';
 import type { ClipItem, DeviceInfo, Settings, ThemeCfg } from '~/types';
 
 export const themeAtom = atom<ThemeCfg>({
@@ -20,7 +20,7 @@ export const settingsAtom = atomWithStorage<Settings>(
     autoStart: false,
     server: false,
     id: crypto.randomUUID().slice(0, 8),
-    name: '',
+    name: UNKNOWN_NAME,
     port: DEFAULT_PORT,
   },
   undefined,

@@ -1,5 +1,6 @@
 import * as AutoStart from '@tauri-apps/plugin-autostart';
 import { atom } from 'jotai';
+import { UNKNOWN_NAME } from '~/consts';
 import { ipc } from '~/ipc';
 import type { Settings } from '~/types';
 import { collectTrayClipItems } from '~/utils/common';
@@ -40,9 +41,9 @@ export const initSettingsAtom = atom(null, async (get, set) => {
   set(settingsAtom, (old) => ({ ...old, autoStart: isEnabled }));
   const settings = get(settingsAtom);
   let name = settings.name;
-  if (!name) {
+  if (!name || name === UNKNOWN_NAME) {
     name = await ipc.getHostName();
-    set(settingsAtom, (old) => ({ ...old, name }));
+    set(settingsAtom, (old) => ({ ...old, name: name || UNKNOWN_NAME }));
     set(hostNameAtom, name);
   }
   if (settings.server) {
@@ -55,4 +56,15 @@ export const handleTrayToggleAutoStartAtom = atom(null, async (get, set) => {
   const enabled = await setAutoStart(!settings.autoStart);
   set(settingsAtom, (old) => ({ ...old, autoStart: enabled }));
   updateAutoStartItemChecked(enabled);
+});
+
+export const validateNameAtom = atom(null, (get, set) => {
+  const settings = get(settingsAtom);
+  const hostName = get(hostNameAtom);
+  const name = settings.name.trim();
+  if (!name) {
+    set(settingsAtom, { ...settings, name: hostName || UNKNOWN_NAME });
+  } else {
+    set(settingsAtom, { ...settings, name });
+  }
 });
