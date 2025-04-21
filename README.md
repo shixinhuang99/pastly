@@ -34,10 +34,6 @@ Since it involves networking, the first time the server is started, it will requ
 
 ![tray screenshot](./screenshots//2.png)
 
-- Sync settings
-
-![app settings screenshot](./screenshots/3.png)
-
 ### Development
 
 requirements:
