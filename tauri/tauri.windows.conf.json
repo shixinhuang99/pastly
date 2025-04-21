@@ -3,7 +3,7 @@
   "app": {
     "windows": [
       {
-        "title": "Pastly",
+        "title": "",
         "width": 500,
         "minWidth": 500,
         "height": 700,
@@ -14,7 +14,8 @@
     ],
     "trayIcon": {
       "iconPath": "../assets/32x32.png",
-      "tooltip": "Pastly"
+      "tooltip": "Pastly",
+      "showMenuOnLeftClick": false
     },
     "security": {
       "csp": null

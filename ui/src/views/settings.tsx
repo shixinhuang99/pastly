@@ -13,9 +13,9 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { deleteAllClipItemsAtom } from '~/atom/clip-items';
+import { addDeviceAtom, removeDeviceAtom } from '~/atom/devices';
 import { setLanguageAtom } from '~/atom/language';
 import {
-  devicesAtom,
   hostNameAtom,
   languageAtom,
   serverPendingAtom,
@@ -64,9 +64,10 @@ export function SettingsDialog() {
   const t = useT();
   const initSettings = useSetAtom(initSettingsAtom);
   const handleTrayToggleAutoStart = useSetAtom(handleTrayToggleAutoStartAtom);
-  const setDevices = useSetAtom(devicesAtom);
   const initTheme = useSetAtom(initThemeAtom);
   const applyMatchMedia = useSetAtom(applyMatchMediaAtom);
+  const addDevice = useSetAtom(addDeviceAtom);
+  const removeDevice = useSetAtom(removeDeviceAtom);
 
   useOnceEffect(() => {
     initTheme();
@@ -83,10 +84,10 @@ export function SettingsDialog() {
       handleTrayToggleAutoStart();
     });
     ipc.listenDeviceFound((device) => {
-      setDevices((old) => [...old, device]);
+      addDevice(device);
     });
     ipc.listenDeviceRemoved((id) => {
-      setDevices((old) => old.filter((item) => item.id !== id));
+      removeDevice(id);
     });
   });
 

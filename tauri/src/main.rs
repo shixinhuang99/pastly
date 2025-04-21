@@ -3,11 +3,11 @@
 mod crypto;
 mod sync;
 
-use tauri::Manager;
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+use tauri::RunEvent;
 #[cfg(target_os = "windows")]
 use tauri::tray::{MouseButton, TrayIconEvent};
-#[cfg(any(target_os = "macos", target_os = "windows"))]
-use tauri::{AppHandle, RunEvent};
+use tauri::{AppHandle, Manager};
 
 use crate::sync::{ClipItem, DeviceInfo};
 
@@ -21,8 +21,16 @@ fn main() {
 
 			let _ = app.handle().plugin(tauri_plugin_autostart::init(
 				tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-				None,
+				Some(vec!["-s"]),
 			));
+
+			let args: Vec<String> = std::env::args().collect();
+
+			if args.contains(&"-s".to_string()) {
+				if let Some(ww) = app.get_webview_window("main") {
+					let _ = ww.hide();
+				}
+			}
 
 			Ok(())
 		})
@@ -68,8 +76,8 @@ fn main() {
 }
 
 #[cfg(any(target_os = "macos", target_os = "windows"))]
-fn show_main_window(app_handle: &AppHandle) {
-	let Some(ww) = app_handle.get_webview_window("main") else {
+fn show_main_window(app: &AppHandle) {
+	let Some(ww) = app.get_webview_window("main") else {
 		return;
 	};
 	let _ = ww.show();
