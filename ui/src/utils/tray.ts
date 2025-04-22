@@ -60,6 +60,7 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     id: PreDefMenuItemId.autoStart,
     text: t('autoStartTray'),
     checked: settings?.autoStart ?? false,
+    accelerator: genAccelerator('Cmd+A'),
     action() {
       emitter.emit('toggle-auto-start');
     },
@@ -68,6 +69,7 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     id: PreDefMenuItemId.server,
     text: t('server'),
     checked: settings?.server ?? false,
+    accelerator: genAccelerator('Cmd+S'),
     action() {
       emitter.emit('toggle-server');
     },

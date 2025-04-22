@@ -6,7 +6,7 @@ Clipboard manager synced across devices via local network
 
 ### Installation
 
-[Check latest release](https://github.com/shixinhuang99/pastly/releases)
+[Check out latest release](https://github.com/shixinhuang99/pastly/releases)
 
 ### Features
 

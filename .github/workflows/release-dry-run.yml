@@ -1,0 +1,59 @@
+name: release-dry-run
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+    name: release (${{ matrix.os }})
+
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+          - os: windows-latest
+          - os: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'x86_64-apple-darwin' || '' }}
+
+      - name: macos bundles
+        if: matrix.os == 'macos-latest'
+        run: |
+          npm i pnpm -g
+          pnpm i
+          node --run build:ui
+          node --run build:tauri:macos
+          node --run bundle:macos
+
+      - name: windows bundles
+        if: matrix.os == 'windows-latest'
+        run: |
+          npm i pnpm -g
+          pnpm i
+          node --run build:ui
+          node --run build:tauri
+          node --run bundle
+
+      - name: linux bundles
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          npm i pnpm -g
+          pnpm i
+          node --run build:ui
+          node --run build:tauri
+          node --run bundle
