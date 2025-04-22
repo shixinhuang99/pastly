@@ -7,5 +7,7 @@
             <string>en</string>
             <string>zh_CN</string>
         </array>
+        <key>LSUIElement</key>
+        <true />
     </dict>
 </plist>
