@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { Langs } from '~/consts';
-import { JsonParse } from '~/utils/common';
+import { jsonParse } from '~/utils/common';
 import { type TranslationKeys, en } from './en';
 import { zh } from './zh';
 
@@ -15,7 +15,7 @@ export function initI18n() {
     },
   };
 
-  const lang = JsonParse<string>(localStorage.getItem('language')) || Langs.En;
+  const lang = jsonParse<string>(localStorage.getItem('language')) || Langs.En;
 
   i18n.use(initReactI18next).init({
     resources,

@@ -6,13 +6,11 @@ import {
 } from '@tauri-apps/api/menu';
 import { TrayIcon } from '@tauri-apps/api/tray';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-import * as AutoStart from '@tauri-apps/plugin-autostart';
 import { clear, writeText } from 'tauri-plugin-clipboard-api';
-import { toastError } from '~/components';
 import { t } from '~/i18n';
 import { ipc } from '~/ipc';
-import type { Settings, TextClipItem } from '~/types';
-import { JsonParse } from '~/utils/common';
+import type { DeviceInfo, Settings, TextClipItem } from '~/types';
+import { jsonParse } from '~/utils/common';
 import { emitter } from '~/utils/event-emitter';
 
 let tray: TrayIcon | null = null;
@@ -24,6 +22,8 @@ const PreDefMenuItemId = {
   ShowWindow: 'showWindow',
   Quit: 'quit',
   autoStart: 'autoStart',
+  noConnections: 'noConnections',
+  server: 'server',
 } as const;
 
 export async function initTrayMenu(clipItems: TextClipItem[]) {
@@ -37,7 +37,9 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     return;
   }
   const clipMenuItems = await createClipMenuItems(clipItems);
-  menu.append(clipMenuItems);
+  if (clipMenuItems.length) {
+    menu.append(clipMenuItems);
+  }
   if (!clipItems.length) {
     const noDataItem = await MenuItem.new({
       id: PreDefMenuItemId.NoData,
@@ -46,22 +48,30 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     });
     await menu.append(noDataItem);
   }
-  const speratorItem = await PredefinedMenuItem.new({ item: 'Separator' });
-  const isAutoStartEnabled = await AutoStart.isEnabled();
+  const speratorItem1 = await createSeprator();
+  const noConnectionsItem = await MenuItem.new({
+    id: PreDefMenuItemId.noConnections,
+    text: t('noConnections'),
+    enabled: false,
+  });
+  const speratorItem2 = await createSeprator();
+  const settings = getSettings();
   const autoStartItem = await CheckMenuItem.new({
     id: PreDefMenuItemId.autoStart,
     text: t('autoStartTray'),
-    checked: isAutoStartEnabled,
+    checked: settings?.autoStart ?? false,
     action() {
       emitter.emit('toggle-auto-start');
     },
   });
-  const genAccelerator = (v: string) => {
-    if (PLATFORM === 'win32' || PLATFORM === 'linux') {
-      return undefined;
-    }
-    return v;
-  };
+  const serverItem = await CheckMenuItem.new({
+    id: PreDefMenuItemId.server,
+    text: t('server'),
+    checked: settings?.server ?? false,
+    action() {
+      emitter.emit('toggle-server');
+    },
+  });
   const clearClipboardItem = await MenuItem.new({
     id: PreDefMenuItemId.Clear,
     text: t('clearClipboard'),
@@ -85,17 +95,22 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     text: t('quit'),
     accelerator: genAccelerator('Cmd+Q'),
     async action() {
-      const settings = JsonParse<Settings>(localStorage.getItem('settings'));
+      const settings = getSettings();
       if (settings) {
-        await ipc.shutdownServer(settings.id);
+        try {
+          await ipc.shutdownServer(settings.id);
+        } catch (_) {}
       }
       const ww = getCurrentWebviewWindow();
       await ww.destroy();
     },
   });
   await menu.append([
-    speratorItem,
+    speratorItem1,
+    noConnectionsItem,
+    speratorItem2,
     autoStartItem,
+    serverItem,
     clearClipboardItem,
     showWindowItem,
     quitItem,
@@ -103,12 +118,27 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
   await tray.setMenu(menu);
 }
 
+async function createSeprator() {
+  return PredefinedMenuItem.new({ item: 'Separator' });
+}
+
+function getSettings() {
+  return jsonParse<Settings>(localStorage.getItem('settings'));
+}
+
+function genAccelerator(v?: string) {
+  if (PLATFORM === 'win32' || PLATFORM === 'linux') {
+    return undefined;
+  }
+  return v;
+}
+
 async function createClipMenuItems(
   clipItems: TextClipItem[],
 ): Promise<MenuItem[]> {
   let index = 1;
-  const genAccelerator = () => {
-    if (index < 1 || index > 10 || PLATFORM === 'win32') {
+  const genClipItemAccelerator = () => {
+    if (index < 1 || index > 10) {
       return undefined;
     }
     return `Cmd+${index === 10 ? 0 : index}`;
@@ -118,19 +148,22 @@ async function createClipMenuItems(
   for (const clipItem of clipItems) {
     const item = await MenuItem.new({
       id: clipItem.id,
-      text: clipItem.value.slice(0, 10),
-      accelerator: genAccelerator(),
+      text: clipItem.value.slice(0, 15),
+      accelerator: genAccelerator(genClipItemAccelerator()),
       async action(id) {
         try {
           window.__pastly.copiedItemId = id;
-          await writeText(clipItem.value);
-        } catch (error) {
-          toastError(t('somethingWentWrong'), error);
+          const value = window.__pastly.trayCclipItemValueMap.get(id);
+          if (value) {
+            await writeText(value);
+          }
+        } finally {
           window.__pastly.copiedItemId = '';
         }
       },
     });
     window.__pastly.trayClipItemIds.add(clipItem.id);
+    window.__pastly.trayCclipItemValueMap.set(clipItem.id, clipItem.value);
     index += 1;
     items.push(item);
   }
@@ -153,11 +186,15 @@ export async function changeTrayMenuLanguage() {
       await item.setText(t('quit'));
     } else if (item.id === PreDefMenuItemId.autoStart) {
       await item.setText(t('autoStart'));
+    } else if (item.id === PreDefMenuItemId.noConnections) {
+      await item.setText(t('noConnections'));
+    } else if (item.id === PreDefMenuItemId.server) {
+      await item.setText(t('server'));
     }
   }
 }
 
-export async function updateTrayMenuItems(clipItems: TextClipItem[]) {
+export async function updateTrayClipItems(clipItems: TextClipItem[]) {
   if (!tray || !menu) {
     return;
   }
@@ -172,8 +209,15 @@ export async function updateTrayMenuItems(clipItems: TextClipItem[]) {
   }
   if (clipItems.length) {
     const clipMenuItems = await createClipMenuItems(clipItems);
-    menu.insert(clipMenuItems, 0);
+    if (clipMenuItems.length) {
+      menu.insert(clipMenuItems, 0);
+    }
   } else {
+    window.__pastly.trayClipItemIds.clear();
+    const item = await menu.get(PreDefMenuItemId.NoData);
+    if (item) {
+      return;
+    }
     const noDataItem = await MenuItem.new({
       id: PreDefMenuItemId.NoData,
       text: t('noData'),
@@ -192,4 +236,67 @@ export async function updateAutoStartItemChecked(v: boolean) {
     return;
   }
   await (autoStartItem as CheckMenuItem).setChecked(v);
+}
+
+export async function updateServerItemChecked(v: boolean) {
+  if (!tray || !menu) {
+    return;
+  }
+  const serverItem = await menu.get(PreDefMenuItemId.server);
+  if (!serverItem) {
+    return;
+  }
+  await (serverItem as CheckMenuItem).setChecked(v);
+}
+
+function getDeviceItemInsertIdx() {
+  const clipItemsCount = window.__pastly.trayClipItemIds.size;
+  return clipItemsCount ? clipItemsCount + 1 : 2;
+}
+
+export async function addTrayDeviceItem(
+  device: DeviceInfo,
+  afterCount: number,
+) {
+  if (!tray || !menu) {
+    return;
+  }
+  const idx = getDeviceItemInsertIdx();
+  const deviceItem = await MenuItem.new({
+    id: device.id,
+    text: device.name.slice(0, 15),
+    enabled: false,
+  });
+  await menu.insert(deviceItem, idx);
+  if (afterCount === 1) {
+    const item = await menu.get(PreDefMenuItemId.noConnections);
+    if (item) {
+      await menu.remove(item);
+    }
+  }
+}
+
+export async function removeTrayDeviceItem(ids: string[], afterCount: number) {
+  if (!tray || !menu) {
+    return;
+  }
+  for (const id of ids) {
+    const item = await menu.get(id);
+    if (item) {
+      await menu.remove(item);
+    }
+  }
+  if (afterCount === 0) {
+    const item = await menu.get(PreDefMenuItemId.noConnections);
+    if (item) {
+      return;
+    }
+    const idx = getDeviceItemInsertIdx();
+    const noConnectionsItem = await MenuItem.new({
+      id: PreDefMenuItemId.noConnections,
+      text: t('noConnections'),
+      enabled: false,
+    });
+    await menu.insert(noConnectionsItem, idx);
+  }
 }

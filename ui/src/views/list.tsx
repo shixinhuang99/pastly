@@ -23,13 +23,7 @@ import {
 } from '~/atom/clip-items';
 import { clipItemsAtom, writeToClipboardPendingAtom } from '~/atom/primitive';
 import { getDevicesAtom } from '~/atom/server';
-import {
-  Button,
-  SearchInput,
-  Textarea,
-  TooltipButton,
-  toastError,
-} from '~/components';
+import { Button, SearchInput, Textarea, TooltipButton } from '~/components';
 import { DatePicker } from '~/components/date-picker';
 import { VirtualList, type VirtualListRef } from '~/components/virtual-list';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
@@ -206,8 +200,7 @@ function Item(props: { clipItem: ClipItem }) {
       } else if (type === 'files') {
         await writeFiles(value);
       }
-    } catch (error) {
-      toastError(t('somethingWentWrong'), error);
+    } finally {
       window.__pastly.copiedItemId = '';
       setWriteToClipboardPending(false);
     }
@@ -370,8 +363,8 @@ function RevealInDirButton(props: {
     try {
       await revealItemInDir(path);
     } catch (error) {
-      toastError(t('somethingWentWrong'), error);
       onError(path);
+      throw error;
     }
   };
 

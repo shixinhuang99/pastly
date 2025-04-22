@@ -60,7 +60,7 @@ function ServerSwtich() {
           {settings.server ? <Wifi /> : <WifiOff />}
         </TooltipButton>
       )}
-      {settings.server && (
+      {settings.server && !serverPending && (
         <Popover>
           <PopoverTrigger asChild>
             <TooltipButton className="relative" tooltip={t('connections')}>

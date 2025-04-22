@@ -1,4 +1,4 @@
-type CustomEvents = 'toggle-auto-start';
+type CustomEvents = 'toggle-auto-start' | 'toggle-server';
 
 class EventEmitter extends EventTarget {
   emit(name: CustomEvents) {

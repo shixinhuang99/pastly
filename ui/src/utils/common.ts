@@ -42,7 +42,7 @@ export function collectTrayClipItems(
   return result;
 }
 
-export function JsonParse<T>(str: string | null | undefined): T | null {
+export function jsonParse<T>(str: string | null | undefined): T | null {
   if (!str) {
     return null;
   }

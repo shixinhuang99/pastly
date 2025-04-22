@@ -9,7 +9,7 @@ import {
   insertClipItem,
   updateClipItem,
 } from '~/utils/db';
-import { initTrayMenu, updateTrayMenuItems } from '~/utils/tray';
+import { initTrayMenu, updateTrayClipItems } from '~/utils/tray';
 import { clipItemsAtom } from './primitive';
 
 export const initClipItemsAtom = atom(null, async (_, set) => {
@@ -60,11 +60,11 @@ export const updateClipItemAtom = atom(
 export const deleteAllClipItemsAtom = atom(null, async (_, set) => {
   await deleteAllClipItems();
   set(clipItemsAtom, []);
-  updateTrayMenuItems([]);
+  updateTrayClipItems([]);
 });
 
 export const updateTrayMenuItemsAtom = atom(null, async (get) => {
   const items = get(clipItemsAtom);
   const textClipItems = collectTrayClipItems(items);
-  await updateTrayMenuItems(textClipItems);
+  await updateTrayClipItems(textClipItems);
 });

@@ -7,5 +7,6 @@ interface Window {
   __pastly: {
     copiedItemId: string;
     trayClipItemIds: Set<string>;
+    trayCclipItemValueMap: Map<string, string>;
   };
 }

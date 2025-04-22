@@ -67,6 +67,7 @@ export function SettingsDialog() {
   const applyMatchMedia = useSetAtom(applyMatchMediaAtom);
   const addDevice = useSetAtom(addDeviceAtom);
   const removeDevice = useSetAtom(removeDeviceAtom);
+  const startOrShutdownServer = useSetAtom(startOrShutdownServerAtom);
 
   useOnceEffect(() => {
     initTheme();
@@ -81,6 +82,9 @@ export function SettingsDialog() {
     initSettings();
     emitter.on('toggle-auto-start', () => {
       toggleAutoStart();
+    });
+    emitter.on('toggle-server', () => {
+      startOrShutdownServer();
     });
     ipc.listenDeviceFound((device) => {
       addDevice(device);

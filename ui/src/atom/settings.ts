@@ -20,6 +20,7 @@ async function setAutoStart(autoStart: boolean) {
 export const initSettingsAtom = atom(null, async (get, set) => {
   const isEnabled = await AutoStart.isEnabled();
   set(settingsAtom, (old) => ({ ...old, autoStart: isEnabled }));
+  updateAutoStartItemChecked(isEnabled);
   const hostName = await ipc.getHostName();
   set(hostNameAtom, hostName);
   const settings = get(settingsAtom);
