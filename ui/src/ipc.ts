@@ -19,7 +19,7 @@ export const ipc = {
       id,
       port,
       name,
-      pin: pin?.length ? pin : undefined,
+      pin: pin.trim().length ? pin : undefined,
     });
   },
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from './shadcn/input';
 
 interface InputNumberProps
@@ -18,6 +18,10 @@ export function InputNumber(props: InputNumberProps) {
   } = props;
 
   const [draftValue, setDraftValue] = useState(value?.toString() ?? '');
+
+  useEffect(() => {
+    setDraftValue(value?.toString() ?? '');
+  }, [value]);
 
   const isInvalidValue = (valueAsNumber: number): boolean => {
     return (

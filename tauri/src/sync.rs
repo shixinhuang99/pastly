@@ -383,14 +383,14 @@ pub async fn broadcast_clipboard_sync(
 	};
 
 	for device in devices {
-		println!("Ready send to {}", device.name);
+		println!("ready send to {}", device.name);
 		let url = format!("http://{}:{}/broadcast", device.ip, device.port);
 		let req = client.post(url).json(&clip_item);
 		tokio::spawn(async move {
 			if req.send().await.is_ok() {
-				println!("Send to {}", device.name);
+				println!("send to {}", device.name);
 			} else {
-				println!("Failed send to {}", device.name);
+				println!("failed send to {}", device.name);
 			}
 		});
 	}

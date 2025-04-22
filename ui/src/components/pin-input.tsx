@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from './shadcn/input';
 
 interface PINInputProps extends Omit<React.ComponentProps<'input'>, 'value'> {
@@ -8,7 +8,11 @@ interface PINInputProps extends Omit<React.ComponentProps<'input'>, 'value'> {
 export function PINInput(props: PINInputProps) {
   const { value, onChange = () => {}, ...restProps } = props;
 
-  const [draftValue, setDraftValue] = useState(value);
+  const [draftValue, setDraftValue] = useState(value ?? '');
+
+  useEffect(() => {
+    setDraftValue(value ?? '');
+  }, [value]);
 
   const isInvalidValue = (rawValue?: string): boolean => {
     return !(
@@ -21,7 +25,7 @@ export function PINInput(props: PINInputProps) {
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     if (isInvalidValue(rawValue)) {
-      setDraftValue(value);
+      setDraftValue(value ?? '');
       return;
     }
     setDraftValue(rawValue);

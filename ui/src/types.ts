@@ -22,7 +22,7 @@ export interface Settings {
   id: string;
   name: string;
   port: number;
-  pin?: string;
+  pin: string;
 }
 
 export interface ClipItemDBSchema {

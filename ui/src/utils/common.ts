@@ -60,6 +60,6 @@ export function getDefaultSettings(): Settings {
     id: crypto.randomUUID().slice(0, 8),
     name: UNKNOWN_NAME,
     port: DEFAULT_PORT,
-    pin: undefined,
+    pin: '',
   };
 }

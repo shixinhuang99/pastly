@@ -33,6 +33,9 @@ fn main() {
 				}
 			}
 
+			#[cfg(target_os = "linux")]
+			delay_restart(app, args);
+
 			Ok(())
 		})
 		.invoke_handler(tauri::generate_handler![
@@ -85,6 +88,28 @@ fn show_main_window(app: &AppHandle) {
 	let _ = ww.set_focus();
 }
 
+// temporary solution for tray icon not showing up
+#[cfg(target_os = "linux")]
+fn delay_restart(app: &tauri::App, args: Vec<String>) {
+	use std::{
+		thread::{sleep, spawn},
+		time::Duration,
+	};
+	use tauri::process::restart;
+
+	if !args.contains(&"-s".to_string()) || args.contains(&"-r".to_string()) {
+		return;
+	}
+
+	let mut env = app.env();
+	spawn(move || {
+		sleep(Duration::from_secs(2));
+		env.args_os.push("-r".into());
+		println!("delay restart");
+		restart(&env);
+	});
+}
+
 #[tauri::command]
 fn get_host_name() -> String {
 	hostname::get()
@@ -101,6 +126,15 @@ async fn start_server(
 	port: u16,
 	pin: Option<String>,
 ) -> Result<(), String> {
+	#[cfg(target_os = "linux")]
+	{
+		let args: Vec<String> = std::env::args().collect();
+		if args.contains(&"-s".to_string()) && !args.contains(&"-r".to_string())
+		{
+			return Ok(());
+		}
+	}
+
 	sync::start_server(app, id, name, port, pin)
 		.await
 		.map_err(|err| err.to_string())
