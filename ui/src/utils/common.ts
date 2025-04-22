@@ -27,7 +27,7 @@ export function getDateFnsLocaleFromI18nLang(lang: string) {
 
 export function collectTrayClipItems(
   clipItems: ClipItem[],
-  trayItemsCount: number,
+  trayItemsCount = 10,
 ) {
   const result: TextClipItem[] = [];
   for (const item of clipItems) {
@@ -55,8 +55,6 @@ export function JsonParse<T>(str: string | null | undefined): T | null {
 
 export function getDefaultSettings(): Settings {
   return {
-    maxItemsCount: 50000,
-    trayItemsCount: 10,
     autoStart: false,
     server: false,
     id: crypto.randomUUID().slice(0, 8),

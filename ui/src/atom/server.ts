@@ -7,7 +7,7 @@ export const getDevicesAtom = atom(null, (get) => {
   return get(devicesAtom);
 });
 
-export const startAndShutdownServerAtom = atom(
+export const startOrShutdownServerAtom = atom(
   null,
   async (get, set, checked: boolean) => {
     if (checked) {

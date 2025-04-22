@@ -63,18 +63,3 @@ export async function deleteAllClipItems(): Promise<void> {
   const db = await getDbInstance();
   await db.execute('DELETE FROM clip_items');
 }
-
-export async function deleteExcessClipItems(limit: number): Promise<void> {
-  const db = await getDbInstance();
-  await db.execute(
-    `
-    DELETE FROM clip_items 
-    WHERE id NOT IN (
-      SELECT id FROM clip_items 
-      ORDER BY date DESC
-      LIMIT $1
-    )
-  `,
-    [limit],
-  );
-}

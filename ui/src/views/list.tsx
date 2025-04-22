@@ -81,6 +81,7 @@ export function List() {
         const text = await readText();
         newClipItem = createClipItem('text', text);
       }
+      setWriteToClipboardPending(false);
       if (!newClipItem) {
         return;
       }
@@ -88,15 +89,16 @@ export function List() {
       if (!window.__pastly.copiedItemId) {
         virtualListRef.current?.scrollToTop();
       }
-      setWriteToClipboardPending(false);
       window.__pastly.copiedItemId = '';
       if (newClipItem.type !== 'files') {
         ipc.broadcastClipboardSync(newClipItem, getDevices());
       }
     });
+
     ipc.listenClipboardSync((clipboardSync: ClipboardSync) => {
       addClipItem(createClipItem(clipboardSync.kind, clipboardSync.value));
     });
+
     try {
       loading.on();
       await initClipItems();

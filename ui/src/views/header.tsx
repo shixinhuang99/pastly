@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Loader, Radio, Wifi, WifiOff } from 'lucide-react';
 import { devicesAtom, serverPendingAtom, settingsAtom } from '~/atom/primitive';
-import { startAndShutdownServerAtom } from '~/atom/server';
+import { startOrShutdownServerAtom } from '~/atom/server';
 import { Button, TooltipButton } from '~/components';
 import {
   Popover,
@@ -43,7 +43,7 @@ function ServerSwtich() {
   const t = useT();
   const settings = useAtomValue(settingsAtom);
   const devices = useAtomValue(devicesAtom);
-  const startAndShutdownServer = useSetAtom(startAndShutdownServerAtom);
+  const startOrShutdownServer = useSetAtom(startOrShutdownServerAtom);
   const serverPending = useAtomValue(serverPendingAtom);
 
   return (
@@ -55,7 +55,7 @@ function ServerSwtich() {
       ) : (
         <TooltipButton
           tooltip={settings.server ? t('shutdownServer') : t('startServer')}
-          onClick={() => startAndShutdownServer(!settings.server)}
+          onClick={() => startOrShutdownServer(!settings.server)}
         >
           {settings.server ? <Wifi /> : <WifiOff />}
         </TooltipButton>

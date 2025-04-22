@@ -1,8 +1,3 @@
-export interface ThemeCfg {
-  display: string;
-  className: string;
-}
-
 export type ClipItemTypes = 'text' | 'image' | 'files';
 
 export interface BaseClipItem<T extends ClipItemTypes, P> {
@@ -22,8 +17,6 @@ export type ClipItem =
   | BaseClipItem<'files', string[]>;
 
 export interface Settings {
-  maxItemsCount: number;
-  trayItemsCount: number;
   autoStart: boolean;
   server: boolean;
   id: string;

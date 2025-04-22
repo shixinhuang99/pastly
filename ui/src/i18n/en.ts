@@ -18,8 +18,6 @@ export const en = {
   itemsCount: '{{count}} Items',
   settings: 'Settings',
   applicationSettings: 'Application Settings',
-  maxItemsCount: 'Max items count',
-  trayItemsCount: 'Tray items count',
   version: 'Version',
   somethingWentWrong: 'Something went wrong :(',
   deleteAllClipItems: 'Delete all clip items',

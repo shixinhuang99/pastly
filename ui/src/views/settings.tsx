@@ -1,7 +1,7 @@
 import { appConfigDir, appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { LoaderCircle, SettingsIcon } from 'lucide-react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { LoaderCircle, SettingsIcon, TimerReset } from 'lucide-react';
 import {
   ExternalLink,
   FolderOpen,
@@ -22,12 +22,11 @@ import {
   settingsAtom,
   themeAtom,
 } from '~/atom/primitive';
-import { startAndShutdownServerAtom } from '~/atom/server';
+import { startOrShutdownServerAtom } from '~/atom/server';
 import {
-  handleTrayToggleAutoStartAtom,
   initSettingsAtom,
   resetSettingsAtom,
-  updateSettingsAtom,
+  toggleAutoStartAtom,
   validateNameAtom,
 } from '~/atom/settings';
 import { applyMatchMediaAtom, initThemeAtom, setThemeAtom } from '~/atom/theme';
@@ -60,11 +59,10 @@ import { emitter } from '~/utils/event-emitter';
 import { Devices } from './devices';
 
 export function SettingsDialog() {
-  const settings = useAtomValue(settingsAtom);
-  const updateSettings = useSetAtom(updateSettingsAtom);
+  const [settings, setSettings] = useAtom(settingsAtom);
   const t = useT();
   const initSettings = useSetAtom(initSettingsAtom);
-  const handleTrayToggleAutoStart = useSetAtom(handleTrayToggleAutoStartAtom);
+  const toggleAutoStart = useSetAtom(toggleAutoStartAtom);
   const initTheme = useSetAtom(initThemeAtom);
   const applyMatchMedia = useSetAtom(applyMatchMediaAtom);
   const addDevice = useSetAtom(addDeviceAtom);
@@ -82,7 +80,7 @@ export function SettingsDialog() {
   useOnceEffect(() => {
     initSettings();
     emitter.on('toggle-auto-start', () => {
-      handleTrayToggleAutoStart();
+      toggleAutoStart();
     });
     ipc.listenDeviceFound((device) => {
       addDevice(device);
@@ -100,20 +98,20 @@ export function SettingsDialog() {
         </TooltipButton>
       </DialogTrigger>
       <DialogContent
-        className="w-[400px] rounded-lg"
+        className="w-[400px] rounded-lg p-0 gap-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="text-left">
+        <DialogHeader className="text-left p-6">
           <DialogTitle>{t('settings')}</DialogTitle>
           <DialogDescription>{t('applicationSettings')}</DialogDescription>
         </DialogHeader>
         <div
           className={cn(
-            'h-[400px] px-3 overflow-y-auto overflow-x-hidden border-t',
+            'h-[400px] px-6 overflow-y-auto overflow-x-hidden border-t',
             scrollBarCls(),
           )}
         >
-          <Form value={settings} onChange={updateSettings}>
+          <Form value={settings} onChange={setSettings}>
             <AppearancesSettings />
             <GeneralSettings />
             <SyncSettings />
@@ -124,22 +122,7 @@ export function SettingsDialog() {
               <Devices className="border rounded mt-3" />
             </>
           )}
-          <div className="flex flex-col items-center py-3">
-            <div className="text-muted-foreground h-9 flex items-center">
-              {t('version')}: {PKG_VERSION}
-            </div>
-            <DeleteAllClipItemsButton />
-            <ResetSettingsButton />
-            <OpenDatabaseDirButton />
-            <Button
-              variant="link"
-              onClick={() => openUrl(REPOSITORY_URL)}
-              title={REPOSITORY_URL}
-            >
-              {t('viewSourceCode')}
-              <ExternalLink />
-            </Button>
-          </div>
+          <AppInfo />
         </div>
       </DialogContent>
     </Dialog>
@@ -202,27 +185,29 @@ function AppearancesSettings() {
 
 function GeneralSettings() {
   const t = useT();
+  const toggleAutoStart = useSetAtom(toggleAutoStartAtom);
+  const settings = useAtomValue(settingsAtom);
+  const pending = useBoolean();
+
+  const handleAutoStartToggle = async (checked: boolean) => {
+    try {
+      pending.on();
+      await toggleAutoStart(checked);
+    } finally {
+      pending.off();
+    }
+  };
 
   return (
     <>
       <Title title={t('general')} />
-      <FormItem name="autoStart" label={t('autoStart')} comp="switch">
-        <Switch />
-      </FormItem>
-      <FormItem
-        name="maxItemsCount"
-        label={t('maxItemsCount')}
-        comp="input-number"
-      >
-        <InputNumber minValue={1} maxValue={200000} />
-      </FormItem>
-      <FormItem
-        name="trayItemsCount"
-        label={t('trayItemsCount')}
-        comp="input-number"
-      >
-        <InputNumber minValue={1} maxValue={30} />
-      </FormItem>
+      <FormItemOnlyStyle label={t('autoStart')}>
+        <Switch
+          checked={settings.autoStart}
+          onCheckedChange={handleAutoStartToggle}
+          disabled={pending.value}
+        />
+      </FormItemOnlyStyle>
     </>
   );
 }
@@ -231,7 +216,7 @@ function SyncSettings() {
   const settings = useAtomValue(settingsAtom);
   const t = useT();
   const hostName = useAtomValue(hostNameAtom);
-  const startAndShutdownServer = useSetAtom(startAndShutdownServerAtom);
+  const startOrShutdownServer = useSetAtom(startOrShutdownServerAtom);
   const serverPending = useAtomValue(serverPendingAtom);
   const validateName = useSetAtom(validateNameAtom);
 
@@ -252,7 +237,7 @@ function SyncSettings() {
       <FormItemOnlyStyle label={t('server')}>
         <Switch
           checked={settings.server}
-          onCheckedChange={startAndShutdownServer}
+          onCheckedChange={startOrShutdownServer}
           disabled={serverPending}
         />
       </FormItemOnlyStyle>
@@ -282,6 +267,29 @@ function SyncSettings() {
         <PINInput maxLength={4} placeholder={t('pinPlaceholder')} />
       </FormItem>
     </>
+  );
+}
+
+function AppInfo() {
+  const t = useT();
+
+  return (
+    <div className="flex flex-col items-center py-3">
+      <div className="text-muted-foreground h-9 flex items-center">
+        {t('version')}: {PKG_VERSION}
+      </div>
+      <DeleteAllClipItemsButton />
+      <ResetSettingsButton />
+      <OpenDatabaseDirButton />
+      <Button
+        variant="link"
+        onClick={() => openUrl(REPOSITORY_URL)}
+        title={REPOSITORY_URL}
+      >
+        {t('viewSourceCode')}
+        <ExternalLink />
+      </Button>
+    </div>
   );
 }
 
@@ -335,7 +343,11 @@ function ResetSettingsButton() {
   return (
     <Button variant="link" onClick={handleClick}>
       {t('resetSettings')}
-      {pending.value ? <LoaderCircle className="animate-spin" /> : <Trash2 />}
+      {pending.value ? (
+        <LoaderCircle className="animate-spin" />
+      ) : (
+        <TimerReset />
+      )}
     </Button>
   );
 }

@@ -2,62 +2,44 @@ import * as AutoStart from '@tauri-apps/plugin-autostart';
 import { atom } from 'jotai';
 import { UNKNOWN_NAME } from '~/consts';
 import { ipc } from '~/ipc';
-import type { Settings } from '~/types';
-import { collectTrayClipItems, getDefaultSettings } from '~/utils/common';
-import { updateAutoStartItemChecked, updateTrayMenuItems } from '~/utils/tray';
-import { clipItemsAtom, hostNameAtom, settingsAtom } from './primitive';
-import { startAndShutdownServerAtom } from './server';
+import { getDefaultSettings } from '~/utils/common';
+import { updateAutoStartItemChecked } from '~/utils/tray';
+import { hostNameAtom, settingsAtom } from './primitive';
+import { startOrShutdownServerAtom } from './server';
 
 async function setAutoStart(autoStart: boolean) {
-  const isEnabled = await AutoStart.isEnabled();
-  if (autoStart && !isEnabled) {
+  if (autoStart) {
     await AutoStart.enable();
-    return true;
-  }
-  if (!autoStart && isEnabled) {
+  } else {
     await AutoStart.disable();
-    return false;
   }
-  return autoStart;
+  const isEnabled = await AutoStart.isEnabled();
+  return isEnabled;
 }
-
-export const updateSettingsAtom = atom(null, (get, set, value: Settings) => {
-  const old = get(settingsAtom);
-  set(settingsAtom, value);
-  if (old.trayItemsCount !== value.trayItemsCount) {
-    const items = get(clipItemsAtom);
-    const textClipItems = collectTrayClipItems(items, value.trayItemsCount);
-    updateTrayMenuItems(textClipItems);
-  }
-  if (old.autoStart !== value.autoStart) {
-    setAutoStart(value.autoStart).then((v) => {
-      set(settingsAtom, (old) => ({ ...old, autoStart: v }));
-      updateAutoStartItemChecked(v);
-    });
-  }
-});
 
 export const initSettingsAtom = atom(null, async (get, set) => {
   const isEnabled = await AutoStart.isEnabled();
   set(settingsAtom, (old) => ({ ...old, autoStart: isEnabled }));
+  const hostName = await ipc.getHostName();
+  set(hostNameAtom, hostName);
   const settings = get(settingsAtom);
-  let name = settings.name;
-  if (!name || name === UNKNOWN_NAME) {
-    name = await ipc.getHostName();
-    set(settingsAtom, (old) => ({ ...old, name: name || UNKNOWN_NAME }));
-    set(hostNameAtom, name);
+  if (!settings.name.trim().length || settings.name === UNKNOWN_NAME) {
+    set(settingsAtom, (old) => ({ ...old, name: hostName || UNKNOWN_NAME }));
   }
   if (settings.server) {
-    await ipc.startServer(settings);
+    await set(startOrShutdownServerAtom, true);
   }
 });
 
-export const handleTrayToggleAutoStartAtom = atom(null, async (get, set) => {
-  const settings = get(settingsAtom);
-  const enabled = await setAutoStart(!settings.autoStart);
-  set(settingsAtom, (old) => ({ ...old, autoStart: enabled }));
-  updateAutoStartItemChecked(enabled);
-});
+export const toggleAutoStartAtom = atom(
+  null,
+  async (get, set, checked?: boolean) => {
+    const settings = get(settingsAtom);
+    const enabled = await setAutoStart(checked ?? !settings.autoStart);
+    set(settingsAtom, (old) => ({ ...old, autoStart: enabled }));
+    updateAutoStartItemChecked(enabled);
+  },
+);
 
 export const validateNameAtom = atom(null, (get, set) => {
   const settings = get(settingsAtom);
@@ -71,7 +53,8 @@ export const validateNameAtom = atom(null, (get, set) => {
 });
 
 export const resetSettingsAtom = atom(null, async (_, set) => {
-  set(startAndShutdownServerAtom, false);
+  await set(startOrShutdownServerAtom, false);
+  await set(toggleAutoStartAtom, false);
   const defaultSettings = getDefaultSettings();
   const hostName = await ipc.getHostName();
   defaultSettings.name = hostName || UNKNOWN_NAME;

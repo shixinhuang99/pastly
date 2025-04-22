@@ -20,8 +20,6 @@ export const zh: Record<TranslationKeys, string> = {
   itemsCount: '{{count}} 条',
   settings: '设置',
   applicationSettings: '应用设置',
-  maxItemsCount: '最大条目数',
-  trayItemsCount: '托盘条目数',
   version: '版本',
   somethingWentWrong: '出错了 :(',
   deleteAllClipItems: '删除所有剪贴板条目',

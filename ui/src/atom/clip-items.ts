@@ -4,79 +4,67 @@ import { collectTrayClipItems } from '~/utils/common';
 import {
   deleteAllClipItems,
   deleteClipItem,
-  deleteExcessClipItems,
   getAllClipItems,
   initClipItemsTable,
   insertClipItem,
   updateClipItem,
 } from '~/utils/db';
 import { initTrayMenu, updateTrayMenuItems } from '~/utils/tray';
-import { clipItemsAtom, settingsAtom } from './primitive';
+import { clipItemsAtom } from './primitive';
 
-export const initClipItemsAtom = atom(null, async (get, set) => {
+export const initClipItemsAtom = atom(null, async (_, set) => {
   await initClipItemsTable();
   const items = await getAllClipItems();
   set(clipItemsAtom, items);
-  const settings = get(settingsAtom);
-  const textClipItems = collectTrayClipItems(items, settings.trayItemsCount);
+  const textClipItems = collectTrayClipItems(items);
   await initTrayMenu(textClipItems);
 });
 
 export const addClipItemAtom = atom(
   null,
-  async (get, set, newClipItem: ClipItem) => {
+  async (_, set, newClipItem: ClipItem) => {
     if (window.__pastly.copiedItemId) {
       return;
     }
-    const clipItems = get(clipItemsAtom);
-    const settings = get(settingsAtom);
-    const newClipItems = [newClipItem, ...clipItems];
-    if (newClipItems.length > settings.maxItemsCount) {
-      newClipItems.splice(settings.maxItemsCount);
-    }
-    set(clipItemsAtom, newClipItems);
-    await insertClipItem(newClipItem);
-    await deleteExcessClipItems(settings.maxItemsCount);
+    set(clipItemsAtom, (old) => [newClipItem, ...old]);
     if (newClipItem.type === 'text') {
       set(updateTrayMenuItemsAtom);
     }
+    await insertClipItem(newClipItem);
   },
 );
 
-export const deleteClipItemAtom = atom(null, async (get, set, id: string) => {
-  const clipItems = get(clipItemsAtom);
-  const newClipItems = clipItems.filter((item) => item.id !== id);
-  set(clipItemsAtom, newClipItems);
-  await deleteClipItem(id);
+export const deleteClipItemAtom = atom(null, async (_, set, id: string) => {
+  set(clipItemsAtom, (old) => old.filter((item) => item.id !== id));
   if (window.__pastly.trayClipItemIds.has(id)) {
     set(updateTrayMenuItemsAtom);
   }
+  await deleteClipItem(id);
 });
 
 export const updateClipItemAtom = atom(
   null,
-  async (get, set, newClipItem: ClipItem) => {
-    const clipItems = get(clipItemsAtom);
-    const newClipItems = clipItems.map((item) => {
-      if (item.id === newClipItem.id) {
-        return newClipItem;
-      }
-      return item;
+  async (_, set, newClipItem: ClipItem) => {
+    set(clipItemsAtom, (old) => {
+      return old.map((item) => {
+        if (item.id === newClipItem.id) {
+          return newClipItem;
+        }
+        return item;
+      });
     });
-    set(clipItemsAtom, newClipItems);
     await updateClipItem(newClipItem);
   },
 );
 
 export const deleteAllClipItemsAtom = atom(null, async (_, set) => {
-  set(clipItemsAtom, []);
   await deleteAllClipItems();
+  set(clipItemsAtom, []);
   updateTrayMenuItems([]);
 });
 
 export const updateTrayMenuItemsAtom = atom(null, async (get) => {
   const items = get(clipItemsAtom);
-  const settings = get(settingsAtom);
-  const textClipItems = collectTrayClipItems(items, settings.trayItemsCount);
+  const textClipItems = collectTrayClipItems(items);
   await updateTrayMenuItems(textClipItems);
 });
