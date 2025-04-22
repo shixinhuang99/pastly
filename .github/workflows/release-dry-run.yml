@@ -52,6 +52,16 @@ jobs:
       - name: linux bundles
         if: matrix.os == 'ubuntu-latest'
         run: |
+          sudo apt update
+          sudo apt install libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
           npm i pnpm -g
           pnpm i
           node --run build:ui

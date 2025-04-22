@@ -147,6 +147,7 @@ async function createClipMenuItems(
   };
   const items: MenuItem[] = [];
   window.__pastly.trayClipItemIds.clear();
+  window.__pastly.trayCclipItemValueMap.clear();
   for (const clipItem of clipItems) {
     const item = await MenuItem.new({
       id: clipItem.id,
@@ -216,6 +217,7 @@ export async function updateTrayClipItems(clipItems: TextClipItem[]) {
     }
   } else {
     window.__pastly.trayClipItemIds.clear();
+    window.__pastly.trayCclipItemValueMap.clear();
     const item = await menu.get(PreDefMenuItemId.NoData);
     if (item) {
       return;
