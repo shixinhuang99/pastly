@@ -50,4 +50,5 @@ export const zh: Record<TranslationKeys, string> = {
   language: '语言',
   startServer: '启动服务器',
   shutdownServer: '关闭服务器',
+  resetSettings: '重置设置',
 };

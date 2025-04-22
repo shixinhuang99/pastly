@@ -1,7 +1,7 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import { enUS, zhCN } from 'date-fns/locale';
-import { Langs } from '~/consts';
-import type { ClipItem, TextClipItem } from '~/types';
+import { DEFAULT_PORT, Langs, UNKNOWN_NAME } from '~/consts';
+import type { ClipItem, Settings, TextClipItem } from '~/types';
 
 export function fmtFullDate(v: number): string {
   return format(v, 'yyyy/MM/dd HH:mm:ss');
@@ -51,4 +51,17 @@ export function JsonParse<T>(str: string | null | undefined): T | null {
   } catch (_) {
     return null;
   }
+}
+
+export function getDefaultSettings(): Settings {
+  return {
+    maxItemsCount: 50000,
+    trayItemsCount: 10,
+    autoStart: false,
+    server: false,
+    id: crypto.randomUUID().slice(0, 8),
+    name: UNKNOWN_NAME,
+    port: DEFAULT_PORT,
+    pin: undefined,
+  };
 }

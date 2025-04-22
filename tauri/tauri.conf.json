@@ -33,6 +33,13 @@
       "nsis": {
         "installerIcon": "icons/icon.ico"
       }
+    },
+    "linux": {
+      "deb": {
+        "provides": ["pastly"],
+        "conflicts": ["pastly"],
+        "replaces": ["pastly"]
+      }
     }
   }
 }

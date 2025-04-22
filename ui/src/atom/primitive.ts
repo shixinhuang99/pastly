@@ -1,7 +1,8 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { DEFAULT_PORT, Langs, Theme, UNKNOWN_NAME } from '~/consts';
+import { Langs, Theme } from '~/consts';
 import type { ClipItem, DeviceInfo, Settings } from '~/types';
+import { getDefaultSettings } from '~/utils/common';
 
 export const themeAtom = atomWithStorage<string>(
   'theme',
@@ -25,15 +26,7 @@ export const writeToClipboardPendingAtom = atom(false);
 
 export const settingsAtom = atomWithStorage<Settings>(
   'settings',
-  {
-    maxItemsCount: 50000,
-    trayItemsCount: 10,
-    autoStart: false,
-    server: false,
-    id: crypto.randomUUID().slice(0, 8),
-    name: UNKNOWN_NAME,
-    port: DEFAULT_PORT,
-  },
+  getDefaultSettings(),
   undefined,
   { getOnInit: true },
 );

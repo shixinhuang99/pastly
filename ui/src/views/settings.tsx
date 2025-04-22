@@ -1,7 +1,7 @@
 import { appConfigDir, appDataDir, join } from '@tauri-apps/api/path';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { SettingsIcon } from 'lucide-react';
+import { LoaderCircle, SettingsIcon } from 'lucide-react';
 import {
   ExternalLink,
   FolderOpen,
@@ -26,6 +26,7 @@ import { startAndShutdownServerAtom } from '~/atom/server';
 import {
   handleTrayToggleAutoStartAtom,
   initSettingsAtom,
+  resetSettingsAtom,
   updateSettingsAtom,
   validateNameAtom,
 } from '~/atom/settings';
@@ -128,6 +129,7 @@ export function SettingsDialog() {
               {t('version')}: {PKG_VERSION}
             </div>
             <DeleteAllClipItemsButton />
+            <ResetSettingsButton />
             <OpenDatabaseDirButton />
             <Button
               variant="link"
@@ -313,6 +315,28 @@ function DeleteAllClipItemsButton() {
         <Trash2 />
       </Button>
     </AlertDialog>
+  );
+}
+
+function ResetSettingsButton() {
+  const t = useT();
+  const resetSettings = useSetAtom(resetSettingsAtom);
+  const pending = useBoolean();
+
+  const handleClick = async () => {
+    try {
+      pending.on();
+      await resetSettings();
+    } finally {
+      pending.off();
+    }
+  };
+
+  return (
+    <Button variant="link" onClick={handleClick}>
+      {t('resetSettings')}
+      {pending.value ? <LoaderCircle className="animate-spin" /> : <Trash2 />}
+    </Button>
   );
 }
 

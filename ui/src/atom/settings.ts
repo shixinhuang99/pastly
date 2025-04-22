@@ -3,9 +3,10 @@ import { atom } from 'jotai';
 import { UNKNOWN_NAME } from '~/consts';
 import { ipc } from '~/ipc';
 import type { Settings } from '~/types';
-import { collectTrayClipItems } from '~/utils/common';
+import { collectTrayClipItems, getDefaultSettings } from '~/utils/common';
 import { updateAutoStartItemChecked, updateTrayMenuItems } from '~/utils/tray';
 import { clipItemsAtom, hostNameAtom, settingsAtom } from './primitive';
+import { startAndShutdownServerAtom } from './server';
 
 async function setAutoStart(autoStart: boolean) {
   const isEnabled = await AutoStart.isEnabled();
@@ -67,4 +68,12 @@ export const validateNameAtom = atom(null, (get, set) => {
   } else {
     set(settingsAtom, { ...settings, name });
   }
+});
+
+export const resetSettingsAtom = atom(null, async (_, set) => {
+  set(startAndShutdownServerAtom, false);
+  const defaultSettings = getDefaultSettings();
+  const hostName = await ipc.getHostName();
+  defaultSettings.name = hostName || UNKNOWN_NAME;
+  set(settingsAtom, defaultSettings);
 });

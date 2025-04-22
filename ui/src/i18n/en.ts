@@ -50,6 +50,7 @@ export const en = {
   language: 'Language',
   startServer: 'Start server',
   shutdownServer: 'Shutdown server',
+  resetSettings: 'Reset settings',
 };
 
 export type TranslationKeys = keyof typeof en;

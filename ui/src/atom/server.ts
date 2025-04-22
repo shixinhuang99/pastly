@@ -10,14 +10,16 @@ export const getDevicesAtom = atom(null, (get) => {
 export const startAndShutdownServerAtom = atom(
   null,
   async (get, set, checked: boolean) => {
-    set(validateNameAtom);
-    const newSettings = get(settingsAtom);
+    if (checked) {
+      set(validateNameAtom);
+    }
+    const settings = get(settingsAtom);
     set(serverPendingAtom, true);
     try {
       if (checked) {
-        await ipc.startServer(newSettings);
+        await ipc.startServer(settings);
       } else {
-        await ipc.shutdownServer(newSettings.id);
+        await ipc.shutdownServer(settings.id);
         set(devicesAtom, []);
       }
       set(settingsAtom, (old) => ({ ...old, server: checked }));
