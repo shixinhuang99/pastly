@@ -16,7 +16,7 @@
       }
     ],
     "trayIcon": {
-      "iconPath": "../assets/tray_32x32.png",
+      "iconPath": "icons/tray_32x32.png",
       "iconAsTemplate": true,
       "tooltip": "Pastly"
     },

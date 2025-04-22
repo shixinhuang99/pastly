@@ -26,7 +26,7 @@ export const writeToClipboardPendingAtom = atom(false);
 export const settingsAtom = atomWithStorage<Settings>(
   'settings',
   {
-    maxItemsCount: 10000,
+    maxItemsCount: 50000,
     trayItemsCount: 10,
     autoStart: false,
     server: false,
