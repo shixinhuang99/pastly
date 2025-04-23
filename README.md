@@ -1,8 +1,19 @@
-## Pastly
+<h1 align="center">
+  <img src="./tauri/icons/icon.png" alt="Pastly" width="128" />
+  <br>
+  <a href="https://github.com/shixinhuang99/pastly">Pastly</a>
+  <br>
+</h1>
 
-Clipboard manager synced across devices via local network
+<h3 align="center">
+  Clipboard manager with cross-device sync via local network
+</h3>
 
-![app screenshot](./screenshots/1.png)
+### Preview
+
+| Light                             | Dark                             |
+| --------------------------------- | -------------------------------- |
+| ![app light](./screenshots/1.png) | ![app dark](./screenshots/2.png) |
 
 ### Installation
 
@@ -32,7 +43,7 @@ Since it involves networking, the first time the server is started, it will requ
 
 - Tray on macOS
 
-![tray screenshot](./screenshots//2.png)
+<img src="./screenshots/3.png" alt="tray on macOS" width="200" />
 
 ### Development
 

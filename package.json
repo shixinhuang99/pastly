@@ -9,7 +9,7 @@
     "url": "git+https://github.com/shixinhuang99/pastly.git"
   },
   "homepage": "https://github.com/shixinhuang99/pastly",
-  "description": "Clipboard manager synced across devices via local network",
+  "description": "Clipboard manager with cross-device sync via local network",
   "scripts": {
     "fmt": "biome check --linter-enabled=false --write",
     "check": "biome check",

@@ -18,8 +18,9 @@
       "icons/icon.png"
     ],
     "category": "Utility",
-    "shortDescription": "Clipboard manager synced across devices via local network",
-    "longDescription": "Clipboard manager synced across devices via local network",
+    "shortDescription": "Clipboard manager with cross-device sync via local network",
+    "longDescription": "Clipboard manager with cross-device sync via local network",
+    "copyright": "GPL-3.0 license",
     "useLocalToolsDir": true,
     "macOS": {
       "minimumSystemVersion": "12.0.1",

@@ -3,9 +3,10 @@ name = "pastly"
 version = "1.0.0"
 edition = "2024"
 authors = ["shixinhuang99 <shixinhuang99@gmail.com>"]
-description = "Clipboard manager synced across devices via local network"
+description = "Clipboard manager with cross-device sync via local network"
 repository = "https://github.com/shixinhuang99/pastly"
-license = "MIT"
+homepage = "https://github.com/shixinhuang99/pastly"
+license = "GPL-3.0 license"
 publish = false
 
 [dependencies]
