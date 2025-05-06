@@ -55,6 +55,8 @@ requirements:
 
 packages required for Linux (Ubuntu 24.04 for instance):
 
+see [Tauri Doc](https://tauri.app/start/prerequisites/#linux)
+
 ```sh
 sudo apt install libglib2.0-dev \
   libgtk-3-dev \
