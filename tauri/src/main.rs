@@ -24,6 +24,10 @@ fn main() {
 				Some(vec!["-s"]),
 			));
 
+			#[cfg(target_os = "macos")]
+			let _ = app.handle()
+				.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
 			let args: Vec<String> = std::env::args().collect();
 
 			if !args.contains(&"-s".to_string()) {

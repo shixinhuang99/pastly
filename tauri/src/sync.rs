@@ -171,7 +171,7 @@ async fn start_mdns(
 		while let Ok(event) = rx.recv_async().await {
 			match event {
 				ServiceResolved(info) => {
-					println!("mdns service resolved: {:#?}", info);
+					println!("mdns service resolved: {info:#?}");
 					if let Some(device_info) =
 						DeviceInfo::from_service_info(info)
 					{
@@ -183,16 +183,16 @@ async fn start_mdns(
 					}
 				}
 				ServiceRemoved(_, full_name) => {
-					println!("mdns service removed: \"{}\"", full_name);
+					println!("mdns service removed: \"{full_name}\"");
 					if let Some(id) =
-						full_name.strip_suffix(&format!(".{}", SERVICE_TYPE))
+						full_name.strip_suffix(&format!(".{SERVICE_TYPE}"))
 					{
 						app.emit("device_removed", id).unwrap();
 					}
 				}
 				_other_event => {
 					#[cfg(debug_assertions)]
-					println!("{:#?}", _other_event);
+					println!("{_other_event:#?}");
 				}
 			}
 		}
@@ -212,7 +212,7 @@ async fn shutdown_mdns(id: String) {
 		return;
 	};
 	let _ = mdns.stop_browse(SERVICE_TYPE);
-	let full_name = format!("{}.{}", id, SERVICE_TYPE);
+	let full_name = format!("{id}.{SERVICE_TYPE}");
 	if let Ok(unregister_rx) = mdns.unregister(&full_name) {
 		let _ = unregister_rx.recv_async().await;
 	}
@@ -242,7 +242,7 @@ async fn start_http_server(app: AppHandle, port: u16) -> Result<()> {
 	let service: Router<()> = Router::new()
 		.route("/broadcast", post(handle_broadcast))
 		.layer(Extension(app));
-	let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
+	let listener = TcpListener::bind(format!("0.0.0.0:{port}")).await?;
 
 	let (tx, rx) = oneshot::channel::<()>();
 	let (twin_tx, twin_rx) = oneshot::channel::<()>();
@@ -324,7 +324,7 @@ async fn handle_broadcast(
 					.unwrap();
 				}
 				Err(err) => {
-					println!("{}", err);
+					println!("{err}");
 				}
 			};
 		}

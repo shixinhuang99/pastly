@@ -50,5 +50,5 @@ pnpm +args:
 
 bundle-test-app:
 	node --run build:ui
-	node --run build:tauri
-	node --run bundle
+	node --run build:tauri:test
+	node --run bundle:test
