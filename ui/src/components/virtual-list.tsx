@@ -1,5 +1,13 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { Triangle } from 'lucide-react';
+import {
+  forwardRef,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { Button } from '~/components';
 import { useT } from '~/hooks';
 import { cn, scrollBarCls } from '~/utils/cn';
 
@@ -31,6 +39,8 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
       overscan: 5,
     });
     const t = useT();
+    const scrollTopObRef = useRef<HTMLDivElement>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
 
     useImperativeHandle(
       ref,
@@ -47,6 +57,29 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
       [rowVirtualizer],
     );
 
+    useLayoutEffect(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry) {
+            return;
+          }
+          setShowScrollTop(!entry.isIntersecting);
+        },
+        {
+          root: containerRef.current,
+          threshold: 0,
+        },
+      );
+
+      if (scrollTopObRef.current) {
+        observer.observe(scrollTopObRef.current);
+      }
+
+      return () => {
+        observer.disconnect();
+      };
+    }, []);
+
     if (!data.length) {
       return (
         <div className="flex-1 w-full flex items-center justify-center">
@@ -54,6 +87,15 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
         </div>
       );
     }
+
+    const handleScrollToTop = () => {
+      setTimeout(() => {
+        rowVirtualizer.scrollToIndex(0, {
+          align: 'start',
+          behavior: 'smooth',
+        });
+      }, 50);
+    };
 
     return (
       <div
@@ -85,7 +127,22 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
               </div>
             );
           })}
+          <div
+            ref={scrollTopObRef}
+            className="absolute top-[500px] left-0 h-0 w-full pointer-events-none"
+          />
         </div>
+        {showScrollTop && (
+          <Button
+            className="fixed bottom-6 right-4 shadow size-11"
+            onClick={handleScrollToTop}
+          >
+            <div className="flex flex-col">
+              <Triangle className="size-4 w-full" />
+              <span className="text-xs">{t('scrollTop')}</span>
+            </div>
+          </Button>
+        )}
       </div>
     );
   },

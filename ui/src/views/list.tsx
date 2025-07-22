@@ -2,7 +2,7 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { isSameDay } from 'date-fns';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Copy, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   type UpdatedTypes,
@@ -25,7 +25,7 @@ import { clipItemsAtom, writeToClipboardPendingAtom } from '~/atom/primitive';
 import { getDevicesAtom } from '~/atom/server';
 import { Button, SearchInput, Textarea, TooltipButton } from '~/components';
 import { DatePicker } from '~/components/date-picker';
-import { VirtualList, type VirtualListRef } from '~/components/virtual-list';
+import { VirtualList } from '~/components/virtual-list';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
 import { ipc } from '~/ipc';
 import type {
@@ -57,7 +57,6 @@ export function List() {
   const deferredSearch = useDeferredValue(search);
   const t = useT();
   const setWriteToClipboardPending = useSetAtom(writeToClipboardPendingAtom);
-  const virtualListRef = useRef<VirtualListRef>(null);
   const loading = useBoolean();
   const [date, setDate] = useState<Date>();
   const getDevices = useSetAtom(getDevicesAtom);
@@ -80,9 +79,6 @@ export function List() {
         return;
       }
       addClipItem(newClipItem);
-      if (!window.__pastly.copiedItemId) {
-        virtualListRef.current?.scrollToTop();
-      }
       window.__pastly.copiedItemId = '';
       if (newClipItem.type !== 'files') {
         ipc.broadcastClipboardSync(newClipItem, getDevices());
@@ -152,7 +148,6 @@ export function List() {
         <div>{t('itemsCount', { count: filteredClipItems.length })}</div>
       </div>
       <VirtualList
-        ref={virtualListRef}
         className="flex-1 h-px"
         data={filteredClipItems}
         estimateSize={250}

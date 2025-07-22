@@ -49,6 +49,7 @@ export const en = {
   startServer: 'Start server',
   shutdownServer: 'Shutdown server',
   resetSettings: 'Reset settings',
+  scrollTop: 'TOP',
 };
 
 export type TranslationKeys = keyof typeof en;

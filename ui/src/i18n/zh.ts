@@ -49,4 +49,5 @@ export const zh: Record<TranslationKeys, string> = {
   startServer: '启动服务器',
   shutdownServer: '关闭服务器',
   resetSettings: '重置设置',
+  scrollTop: '顶部',
 };
