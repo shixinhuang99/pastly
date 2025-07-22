@@ -35,7 +35,7 @@ import type {
   ClipboardSync,
 } from '~/types';
 import { cardBgCls, cn, scrollBarCls } from '~/utils/cn';
-import { fmtDateDistance, fmtFullDate } from '~/utils/common';
+import { fmtDateDistance, fmtFullDate, isJustCopiedItem } from '~/utils/common';
 
 function createClipItem<T extends ClipItemTypes, P>(
   type: T,
@@ -56,7 +56,6 @@ export function List() {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const t = useT();
-  const setWriteToClipboardPending = useSetAtom(writeToClipboardPendingAtom);
   const loading = useBoolean();
   const [date, setDate] = useState<Date>();
   const getDevices = useSetAtom(getDevicesAtom);
@@ -74,12 +73,10 @@ export function List() {
         const text = await readText();
         newClipItem = createClipItem('text', text);
       }
-      setWriteToClipboardPending(false);
-      if (!newClipItem) {
+      if (!newClipItem || isJustCopiedItem(newClipItem)) {
         return;
       }
       addClipItem(newClipItem);
-      window.__pastly.copiedItemId = '';
       if (newClipItem.type !== 'files') {
         ipc.broadcastClipboardSync(newClipItem, getDevices());
       }
@@ -178,7 +175,7 @@ function Item(props: { clipItem: ClipItem }) {
     }
     const newFiles = value.filter((file) => file !== path);
     if (newFiles.length === 0) {
-      deleteClipItem(clipItem.id);
+      deleteClipItem(id);
       return;
     }
     updateClipItem({ ...clipItem, value: newFiles });
@@ -186,7 +183,6 @@ function Item(props: { clipItem: ClipItem }) {
 
   const handleCopy = async () => {
     try {
-      window.__pastly.copiedItemId = id;
       setWriteToClipboardPending(true);
       if (type === 'text') {
         await writeText(value);
@@ -195,8 +191,11 @@ function Item(props: { clipItem: ClipItem }) {
       } else if (type === 'files') {
         await writeFiles(value);
       }
+      window.__pastly.justCopiedItem = {
+        value: value.toString(),
+        timestamp: Date.now(),
+      };
     } finally {
-      window.__pastly.copiedItemId = '';
       setWriteToClipboardPending(false);
     }
   };

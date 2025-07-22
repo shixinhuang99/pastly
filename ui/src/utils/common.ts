@@ -63,3 +63,13 @@ export function getDefaultSettings(): Settings {
     pin: '',
   };
 }
+
+export function isJustCopiedItem(item: ClipItem) {
+  const distance = item.type === 'image' ? 15000 : 5000;
+  return (
+    !!window.__pastly.justCopiedItem &&
+    window.__pastly.justCopiedItem.value === item.value.toString() &&
+    window.__pastly.justCopiedItem.timestamp < item.date &&
+    item.date - window.__pastly.justCopiedItem.timestamp <= distance
+  );
+}

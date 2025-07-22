@@ -23,9 +23,6 @@ export const initClipItemsAtom = atom(null, async (_, set) => {
 export const addClipItemAtom = atom(
   null,
   async (_, set, newClipItem: ClipItem) => {
-    if (window.__pastly.copiedItemId) {
-      return;
-    }
     set(clipItemsAtom, (old) => [newClipItem, ...old]);
     if (newClipItem.type === 'text') {
       set(updateTrayMenuItemsAtom);
@@ -36,7 +33,7 @@ export const addClipItemAtom = atom(
 
 export const deleteClipItemAtom = atom(null, async (_, set, id: string) => {
   set(clipItemsAtom, (old) => old.filter((item) => item.id !== id));
-  if (window.__pastly.trayClipItemIds.has(id)) {
+  if (window.__pastly.trayClipItemMap.has(id)) {
     set(updateTrayMenuItemsAtom);
   }
   await deleteClipItem(id);

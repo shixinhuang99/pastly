@@ -146,27 +146,21 @@ async function createClipMenuItems(
     return `Cmd+${index === 10 ? 0 : index}`;
   };
   const items: MenuItem[] = [];
-  window.__pastly.trayClipItemIds.clear();
-  window.__pastly.trayCclipItemValueMap.clear();
+  window.__pastly.trayClipItemMap.clear();
   for (const clipItem of clipItems) {
     const item = await MenuItem.new({
       id: clipItem.id,
       text: clipItem.value.slice(0, 15),
       accelerator: genAccelerator(genClipItemAccelerator()),
       async action(id) {
-        try {
-          window.__pastly.copiedItemId = id;
-          const value = window.__pastly.trayCclipItemValueMap.get(id);
-          if (value) {
-            await writeText(value);
-          }
-        } finally {
-          window.__pastly.copiedItemId = '';
+        const value = window.__pastly.trayClipItemMap.get(id);
+        if (value) {
+          await writeText(value);
+          window.__pastly.justCopiedItem = { value, timestamp: Date.now() };
         }
       },
     });
-    window.__pastly.trayClipItemIds.add(clipItem.id);
-    window.__pastly.trayCclipItemValueMap.set(clipItem.id, clipItem.value);
+    window.__pastly.trayClipItemMap.set(clipItem.id, clipItem.value);
     index += 1;
     items.push(item);
   }
@@ -205,7 +199,7 @@ export async function updateTrayClipItems(clipItems: TextClipItem[]) {
   for (const item of items) {
     if (
       item.id === PreDefMenuItemId.NoData ||
-      window.__pastly.trayClipItemIds.has(item.id)
+      window.__pastly.trayClipItemMap.has(item.id)
     ) {
       await menu.remove(item);
     }
@@ -216,8 +210,7 @@ export async function updateTrayClipItems(clipItems: TextClipItem[]) {
       menu.insert(clipMenuItems, 0);
     }
   } else {
-    window.__pastly.trayClipItemIds.clear();
-    window.__pastly.trayCclipItemValueMap.clear();
+    window.__pastly.trayClipItemMap.clear();
     const item = await menu.get(PreDefMenuItemId.NoData);
     if (item) {
       return;
@@ -254,7 +247,7 @@ export async function updateServerItemChecked(v: boolean) {
 }
 
 function getDeviceItemInsertIdx() {
-  const clipItemsCount = window.__pastly.trayClipItemIds.size;
+  const clipItemsCount = window.__pastly.trayClipItemMap.size;
   return clipItemsCount ? clipItemsCount + 1 : 2;
 }
 

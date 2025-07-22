@@ -44,3 +44,8 @@ export interface ClipboardSync {
   kind: Exclude<ClipItemTypes, 'files'>;
   value: string;
 }
+
+export interface JustCopiedItem {
+  value: string;
+  timestamp: number;
+}

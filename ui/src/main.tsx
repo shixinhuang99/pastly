@@ -34,9 +34,7 @@ function main() {
 
 function initGlobalVar() {
   window.__pastly = {
-    copiedItemId: '',
-    trayClipItemIds: new Set(),
-    trayCclipItemValueMap: new Map(),
+    trayClipItemMap: new Map(),
   };
 }
 

@@ -2,6 +2,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Triangle } from 'lucide-react';
 import {
   forwardRef,
+  useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -42,19 +43,21 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
     const scrollTopObRef = useRef<HTMLDivElement>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
+    const handleScrollToTop = useCallback(() => {
+      setTimeout(() => {
+        rowVirtualizer.scrollToIndex(0, {
+          align: 'start',
+          behavior: 'smooth',
+        });
+      }, 50);
+    }, [rowVirtualizer]);
+
     useImperativeHandle(
       ref,
       () => ({
-        scrollToTop: () => {
-          setTimeout(() => {
-            rowVirtualizer.scrollToIndex(0, {
-              align: 'start',
-              behavior: 'smooth',
-            });
-          }, 50);
-        },
+        scrollToTop: handleScrollToTop,
       }),
-      [rowVirtualizer],
+      [handleScrollToTop],
     );
 
     useLayoutEffect(() => {
@@ -87,15 +90,6 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
         </div>
       );
     }
-
-    const handleScrollToTop = () => {
-      setTimeout(() => {
-        rowVirtualizer.scrollToIndex(0, {
-          align: 'start',
-          behavior: 'smooth',
-        });
-      }, 50);
-    };
 
     return (
       <div
