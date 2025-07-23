@@ -50,6 +50,7 @@ export const en = {
   shutdownServer: 'Shutdown server',
   resetSettings: 'Reset settings',
   scrollTop: 'TOP',
+  pickTypes: 'Pick types',
 };
 
 export type TranslationKeys = keyof typeof en;

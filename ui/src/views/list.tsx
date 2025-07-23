@@ -25,6 +25,7 @@ import { clipItemsAtom, writeToClipboardPendingAtom } from '~/atom/primitive';
 import { getDevicesAtom } from '~/atom/server';
 import { Button, SearchInput, Textarea, TooltipButton } from '~/components';
 import { DatePicker } from '~/components/date-picker';
+import { MultiSelect } from '~/components/multi-select';
 import { VirtualList } from '~/components/virtual-list';
 import { useBoolean, useOnceEffect, useT } from '~/hooks';
 import { ipc } from '~/ipc';
@@ -59,6 +60,7 @@ export function List() {
   const loading = useBoolean();
   const [date, setDate] = useState<Date>();
   const getDevices = useSetAtom(getDevicesAtom);
+  const [searchTypes, setSearchTypes] = useState<string[]>([]);
 
   useOnceEffect(async () => {
     onSomethingUpdate(async (updateTypes: UpdatedTypes) => {
@@ -111,8 +113,13 @@ export function List() {
         return false;
       });
     }
+    if (searchTypes.length) {
+      result = result.filter((item) => {
+        return searchTypes.some((ty) => ty === item.type);
+      });
+    }
     return result;
-  }, [deferredSearch, clipItems, date]);
+  }, [deferredSearch, clipItems, date, searchTypes]);
 
   const clipItemDates = useMemo(() => {
     return clipItems.map((item) => item.date);
@@ -128,21 +135,38 @@ export function List() {
 
   return (
     <>
-      <div className="pl-4 pr-6 py-2 flex items-center gap-2">
-        <SearchInput
-          className="flex-1"
-          value={search}
-          onValueChange={setSearch}
-          placeholder={t('searchByKeyword')}
-        />
-        <DatePicker
-          value={date}
-          onChange={setDate}
-          shouldDisabled={(v) => {
-            return !clipItemDates.some((vv) => isSameDay(vv, v));
-          }}
-        />
-        <div>{t('itemsCount', { count: filteredClipItems.length })}</div>
+      <div className="pl-4 pr-6 py-2">
+        <div className="flex items-center gap-2 mb-2">
+          <SearchInput
+            className="flex-1"
+            value={search}
+            onValueChange={setSearch}
+            placeholder={t('searchByKeyword')}
+          />
+          <div>{t('itemsCount', { count: filteredClipItems.length })}</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <DatePicker
+            className="w-[160px]"
+            value={date}
+            onChange={setDate}
+            shouldDisabled={(v) => {
+              return !clipItemDates.some((vv) => isSameDay(vv, v));
+            }}
+          />
+          <MultiSelect
+            options={[
+              { label: t('text'), value: 'text' },
+              { label: t('image'), value: 'image' },
+              { label: t('files'), value: 'files' },
+            ]}
+            value={searchTypes}
+            onValueChange={setSearchTypes}
+            variant="secondary"
+            className="flex-1"
+            placeholder={t('pickTypes')}
+          />
+        </div>
       </div>
       <VirtualList
         className="flex-1 h-px"

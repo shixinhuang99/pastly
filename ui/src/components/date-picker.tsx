@@ -13,13 +13,14 @@ import { cn } from '~/utils/cn';
 import { fmtShortDate, getDateFnsLocaleFromI18nLang } from '~/utils/common';
 
 interface DatePickerProps {
+  className?: string;
   value?: Date;
   onChange: (v?: Date) => void;
   shouldDisabled: (v: Date) => boolean;
 }
 
 export function DatePicker(props: DatePickerProps) {
-  const { value, onChange, shouldDisabled } = props;
+  const { className, value, onChange, shouldDisabled } = props;
 
   const { i18n } = useTranslation();
   const t = useT();
@@ -40,6 +41,7 @@ export function DatePicker(props: DatePickerProps) {
           className={cn(
             'w-[150px] text-start pl-3 font-normal',
             !value && 'text-muted-foreground',
+            className,
           )}
         >
           {value ? dateDisplay : <span>{t('pickDate')}</span>}

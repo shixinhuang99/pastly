@@ -83,14 +83,6 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
       };
     }, []);
 
-    if (!data.length) {
-      return (
-        <div className="flex-1 w-full flex items-center justify-center">
-          <div className="text-muted-foreground">{t('noData')}</div>
-        </div>
-      );
-    }
-
     return (
       <div
         ref={containerRef}
@@ -103,24 +95,30 @@ export const VirtualList = forwardRef<VirtualListRef, VirtualListProps<any>>(
         <div
           className="relative w-full"
           style={{
-            height: rowVirtualizer.getTotalSize(),
+            height: data.length ? rowVirtualizer.getTotalSize() : '100%',
           }}
         >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const item = data[virtualRow.index];
-            return (
-              <div
-                key={item.id}
-                className="absolute top-0 left-0 w-full"
-                style={{
-                  transform: `translateY(${virtualRow.start}px)`,
-                  height: `${virtualRow.size}px`,
-                }}
-              >
-                {renderItem(item, virtualRow.index)}
-              </div>
-            );
-          })}
+          {data.length ? (
+            rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const item = data[virtualRow.index];
+              return (
+                <div
+                  key={item.id}
+                  className="absolute top-0 left-0 w-full"
+                  style={{
+                    transform: `translateY(${virtualRow.start}px)`,
+                    height: `${virtualRow.size}px`,
+                  }}
+                >
+                  {renderItem(item, virtualRow.index)}
+                </div>
+              );
+            })
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="text-muted-foreground">{t('noData')}</div>
+            </div>
+          )}
           <div
             ref={scrollTopObRef}
             className="absolute top-[500px] left-0 h-0 w-full pointer-events-none"

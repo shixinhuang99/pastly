@@ -50,4 +50,5 @@ export const zh: Record<TranslationKeys, string> = {
   shutdownServer: '关闭服务器',
   resetSettings: '重置设置',
   scrollTop: '顶部',
+  pickTypes: '选择类型',
 };
