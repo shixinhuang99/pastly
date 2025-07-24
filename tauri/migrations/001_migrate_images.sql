@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS clip_items (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    value TEXT NOT NULL,
+    date INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS images (
+    id TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);

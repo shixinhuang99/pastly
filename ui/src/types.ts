@@ -11,10 +11,9 @@ export type TextClipItem = BaseClipItem<'text', string>;
 
 export type ImageClipItem = BaseClipItem<'image', string>;
 
-export type ClipItem =
-  | TextClipItem
-  | ImageClipItem
-  | BaseClipItem<'files', string[]>;
+export type FilesClipItem = BaseClipItem<'files', string[]>;
+
+export type ClipItem = TextClipItem | ImageClipItem | FilesClipItem;
 
 export interface Settings {
   autoStart: boolean;
@@ -48,4 +47,9 @@ export interface ClipboardSync {
 export interface JustCopiedItem {
   value: string;
   timestamp: number;
+}
+
+export interface ClipImage {
+  id: string;
+  value: string;
 }

@@ -5,7 +5,6 @@ import {
   deleteAllClipItems,
   deleteClipItem,
   getAllClipItems,
-  initClipItemsTable,
   insertClipItem,
   updateClipItem,
 } from '~/utils/db';
@@ -13,7 +12,6 @@ import { initTrayMenu, updateTrayClipItems } from '~/utils/tray';
 import { clipItemsAtom } from './primitive';
 
 export const initClipItemsAtom = atom(null, async (_, set) => {
-  await initClipItemsTable();
   const items = await getAllClipItems();
   set(clipItemsAtom, items);
   const textClipItems = collectTrayClipItems(items);
@@ -23,11 +21,11 @@ export const initClipItemsAtom = atom(null, async (_, set) => {
 export const addClipItemAtom = atom(
   null,
   async (_, set, newClipItem: ClipItem) => {
-    set(clipItemsAtom, (old) => [newClipItem, ...old]);
-    if (newClipItem.type === 'text') {
+    const clipItem = await insertClipItem(newClipItem);
+    set(clipItemsAtom, (old) => [clipItem, ...old]);
+    if (clipItem.type === 'text') {
       set(updateTrayMenuItemsAtom);
     }
-    await insertClipItem(newClipItem);
   },
 );
 
@@ -42,15 +40,15 @@ export const deleteClipItemAtom = atom(null, async (_, set, id: string) => {
 export const updateClipItemAtom = atom(
   null,
   async (_, set, newClipItem: ClipItem) => {
+    const clipItem = await updateClipItem(newClipItem);
     set(clipItemsAtom, (old) => {
       return old.map((item) => {
-        if (item.id === newClipItem.id) {
-          return newClipItem;
+        if (item.id === clipItem.id) {
+          return clipItem;
         }
         return item;
       });
     });
-    await updateClipItem(newClipItem);
   },
 );
 

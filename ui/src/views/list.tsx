@@ -1,9 +1,7 @@
-import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { isSameDay } from 'date-fns';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { Copy, FolderOpen, LoaderCircle, Trash2 } from 'lucide-react';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { LoaderCircle } from 'lucide-react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import {
   type UpdatedTypes,
   onSomethingUpdate,
@@ -11,19 +9,11 @@ import {
   readImageBase64,
   readText,
   startListening,
-  writeFiles,
-  writeImageBase64,
-  writeText,
 } from 'tauri-plugin-clipboard-api';
-import {
-  addClipItemAtom,
-  deleteClipItemAtom,
-  initClipItemsAtom,
-  updateClipItemAtom,
-} from '~/atom/clip-items';
-import { clipItemsAtom, writeToClipboardPendingAtom } from '~/atom/primitive';
+import { addClipItemAtom, initClipItemsAtom } from '~/atom/clip-items';
+import { clipItemsAtom } from '~/atom/primitive';
 import { getDevicesAtom } from '~/atom/server';
-import { Button, SearchInput, Textarea, TooltipButton } from '~/components';
+import { SearchInput } from '~/components';
 import { DatePicker } from '~/components/date-picker';
 import { MultiSelect } from '~/components/multi-select';
 import { VirtualList } from '~/components/virtual-list';
@@ -35,8 +25,9 @@ import type {
   ClipItemTypes,
   ClipboardSync,
 } from '~/types';
-import { cardBgCls, cn, scrollBarCls } from '~/utils/cn';
-import { fmtDateDistance, fmtFullDate, isJustCopiedItem } from '~/utils/common';
+import { isJustCopiedItem } from '~/utils/common';
+import { migrateImages } from '~/utils/db';
+import { Item } from './item';
 
 function createClipItem<T extends ClipItemTypes, P>(
   type: T,
@@ -90,6 +81,7 @@ export function List() {
 
     try {
       loading.on();
+      await migrateImages();
       await initClipItems();
       await startListening();
     } finally {
@@ -177,222 +169,5 @@ export function List() {
         }}
       />
     </>
-  );
-}
-
-function Item(props: { clipItem: ClipItem }) {
-  const { clipItem } = props;
-
-  const t = useT();
-  const [writeToClipboardPending, setWriteToClipboardPending] = useAtom(
-    writeToClipboardPendingAtom,
-  );
-  const deleteClipItem = useSetAtom(deleteClipItemAtom);
-  const updateClipItem = useSetAtom(updateClipItemAtom);
-
-  const { id, type, value, date } = clipItem;
-  const fullDate = fmtFullDate(date);
-
-  const handleReealInDirError = (path: string) => {
-    if (type !== 'files') {
-      return;
-    }
-    const newFiles = value.filter((file) => file !== path);
-    if (newFiles.length === 0) {
-      deleteClipItem(id);
-      return;
-    }
-    updateClipItem({ ...clipItem, value: newFiles });
-  };
-
-  const handleCopy = async () => {
-    try {
-      setWriteToClipboardPending(true);
-      if (type === 'text') {
-        await writeText(value);
-      } else if (type === 'image') {
-        await writeImageBase64(value);
-      } else if (type === 'files') {
-        await writeFiles(value);
-      }
-      window.__pastly.justCopiedItem = {
-        value: value.toString(),
-        timestamp: Date.now(),
-      };
-    } finally {
-      setWriteToClipboardPending(false);
-    }
-  };
-
-  return (
-    <div className="h-full w-full px-4 py-2">
-      <div className="h-full w-full flex flex-col rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-        <div
-          className={cn(
-            'h-[50px] rounded-tl-lg rounded-tr-lg flex justify-between items-center px-4 text-background',
-            type === 'text' && 'bg-yellow-500',
-            type === 'image' && 'bg-green-500',
-            type === 'files' && 'bg-cyan-500',
-          )}
-        >
-          <div>
-            <div className="text-lg font-semibold">{t(type)}</div>
-            <DateDistanceDisplay date={date} fullDate={fullDate} />
-          </div>
-          <div>
-            <ItemActionButton
-              type={type}
-              onClick={handleCopy}
-              disabled={writeToClipboardPending}
-            >
-              {writeToClipboardPending ? (
-                <LoaderCircle className="animate-spin" />
-              ) : (
-                <Copy className="text-background" />
-              )}
-            </ItemActionButton>
-            <ItemActionButton
-              type={type}
-              onClick={() => deleteClipItem(clipItem.id)}
-            >
-              <Trash2 className="text-background" />
-            </ItemActionButton>
-          </div>
-        </div>
-        {type === 'text' && (
-          <Textarea
-            className={cn(
-              'overflow-y-auto overflow-x-hidden resize-none flex-1 h-px w-full p-2 rounded-none rounded-bl-lg rounded-br-lg whitespace-break-spaces overscroll-contain focus-visible:ring-0',
-              cardBgCls(),
-            )}
-            readOnly
-            value={value}
-            tabIndex={-1}
-          />
-        )}
-        {type === 'image' && (
-          <img
-            className="flex-1 h-px w-full object-contain border rounded-bl-lg rounded-br-lg"
-            src={`data:image/png;base64, ${value}`}
-            alt={`image copied at ${fullDate}`}
-          />
-        )}
-        {type === 'files' && (
-          <div
-            className={cn(
-              'flex-1 h-px w-full border rounded-bl-lg rounded-br-lg overflow-y-auto overflow-x-hidden',
-              scrollBarCls(),
-            )}
-          >
-            {value.map((file) => {
-              return (
-                <div
-                  key={file}
-                  className="px-2 py-1 border-b last:border-b-0 flex items-center gap-1"
-                >
-                  <div
-                    className="truncate flex-1 select-text cursor-text"
-                    title={file}
-                  >
-                    {file}
-                  </div>
-                  <RevealInDirButton
-                    path={file}
-                    onError={handleReealInDirError}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DateDistanceDisplay(props: { date: number; fullDate: string }) {
-  const { date, fullDate } = props;
-
-  const { i18n } = useTranslation();
-  const [distance, setDistance] = useState('');
-
-  useOnceEffect(() => {
-    setInterval(() => {
-      setDistance(fmtDateDistance(date, i18n.language));
-    }, 1000 * 60);
-  });
-
-  useEffect(() => {
-    setDistance(fmtDateDistance(date, i18n.language));
-  }, [date, i18n.language]);
-
-  return (
-    <div className="text-sm" title={fullDate}>
-      {distance}
-    </div>
-  );
-}
-
-function ItemActionButton(
-  props: React.PropsWithChildren<{
-    onClick: () => void;
-    type: string;
-    disabled?: boolean;
-  }>,
-) {
-  const { onClick, children, type, disabled } = props;
-
-  return (
-    <Button
-      className={cn(
-        type === 'text' && 'hover:bg-yellow-400',
-        type === 'image' && 'hover:bg-green-400',
-        type === 'files' && 'hover:bg-cyan-400',
-      )}
-      variant="ghost"
-      size="icon"
-      onClick={onClick}
-      disabled={disabled}
-      tabIndex={-1}
-    >
-      {children}
-    </Button>
-  );
-}
-
-function RevealInDirButton(props: {
-  path: string;
-  onError: (path: string) => void;
-}) {
-  const { path, onError } = props;
-  const t = useT();
-
-  const name = (() => {
-    if (PLATFORM === 'darwin') {
-      return t('finder');
-    }
-    if (PLATFORM === 'win32') {
-      return t('fileExplorer');
-    }
-    return t('fileManager');
-  })();
-
-  const handleClick = async () => {
-    try {
-      await revealItemInDir(path);
-    } catch (error) {
-      onError(path);
-      throw error;
-    }
-  };
-
-  return (
-    <TooltipButton
-      tooltip={t('revealInDir', { name })}
-      onClick={handleClick}
-      tabIndex={-1}
-    >
-      <FolderOpen />
-    </TooltipButton>
   );
 }

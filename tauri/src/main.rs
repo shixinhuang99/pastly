@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod crypto;
+mod db;
 mod sync;
 
 #[cfg(any(target_os = "macos", target_os = "windows"))]
@@ -50,7 +51,11 @@ fn main() {
 		])
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_clipboard::init())
-		.plugin(tauri_plugin_sql::Builder::default().build())
+		.plugin(
+			tauri_plugin_sql::Builder::default()
+				.add_migrations("sqlite:pastly.db", vec![db::migration_v1()])
+				.build(),
+		)
 		.plugin(tauri_plugin_single_instance::init(|app, _, _| {
 			if let Some(ww) = app.get_webview_window("main") {
 				if ww.is_minimized().is_ok_and(|v| v) {
