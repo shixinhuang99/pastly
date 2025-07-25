@@ -15,7 +15,7 @@ export const en = {
   text: 'Text',
   image: 'Image',
   files: 'Files',
-  itemsCount: '{{count}} Items',
+  itemsUnit: 'Items',
   settings: 'Settings',
   applicationSettings: 'Application Settings',
   version: 'Version',

@@ -14,6 +14,7 @@ import { addClipItemAtom, initClipItemsAtom } from '~/atom/clip-items';
 import { clipItemsAtom } from '~/atom/primitive';
 import { getDevicesAtom } from '~/atom/server';
 import { SearchInput } from '~/components';
+import { CountUp } from '~/components/count-up';
 import { DatePicker } from '~/components/date-picker';
 import { MultiSelect } from '~/components/multi-select';
 import { VirtualList } from '~/components/virtual-list';
@@ -135,7 +136,10 @@ export function List() {
             onValueChange={setSearch}
             placeholder={t('searchByKeyword')}
           />
-          <div>{t('itemsCount', { count: filteredClipItems.length })}</div>
+          <div>
+            <CountUp value={filteredClipItems.length} />
+            <span className="ml-1">{t('itemsUnit')}</span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <DatePicker

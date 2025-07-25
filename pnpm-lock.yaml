@@ -104,6 +104,9 @@ importers:
       react-compiler-runtime:
         specifier: 19.0.0-beta-af1b7da-20250417
         version: 19.0.0-beta-af1b7da-20250417(react@18.3.1)
+      react-countup:
+        specifier: ^6.5.3
+        version: 6.5.3(react@18.3.1)
       react-day-picker:
         specifier: ^8.10.1
         version: 8.10.1(date-fns@3.6.0)(react@18.3.1)
@@ -1645,6 +1648,9 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
+  countup.js@2.9.0:
+    resolution: {integrity: sha512-llqrvyXztRFPp6+i8jx25phHWcVWhrHO4Nlt0uAOSKHB8778zzQswa4MU3qKBvkXfJKftRYFJuVHez67lyKdHg==}
+
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -1982,6 +1988,11 @@ packages:
     resolution: {integrity: sha512-1x7EFeLOerr3UbtPyQaF0h16CM1CSqmuf2HRJjRblud+d8xuyBUuEmBzcKyMwNGBmEFsr43Y8/krM/hodT0ywg==}
     peerDependencies:
       react: ^17.0.0 || ^18.0.0 || ^19.0.0 || ^0.0.0-experimental
+
+  react-countup@6.5.3:
+    resolution: {integrity: sha512-udnqVQitxC7QWADSPDOxVWULkLvKUWrDapn5i53HE4DPRVgs+Y5rr4bo25qEl8jSh+0l2cToJgGMx+clxPM3+w==}
+    peerDependencies:
+      react: '>= 16.3.0'
 
   react-day-picker@8.10.1:
     resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==}
@@ -3541,6 +3552,8 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
+  countup.js@2.9.0: {}
+
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -3851,6 +3864,11 @@ snapshots:
 
   react-compiler-runtime@19.0.0-beta-af1b7da-20250417(react@18.3.1):
     dependencies:
+      react: 18.3.1
+
+  react-countup@6.5.3(react@18.3.1):
+    dependencies:
+      countup.js: 2.9.0
       react: 18.3.1
 
   react-day-picker@8.10.1(date-fns@3.6.0)(react@18.3.1):

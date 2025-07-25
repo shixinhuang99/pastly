@@ -17,7 +17,7 @@ export const zh: Record<TranslationKeys, string> = {
   text: '文本',
   image: '图片',
   files: '文件',
-  itemsCount: '{{count}} 条',
+  itemsUnit: '条',
   settings: '设置',
   applicationSettings: '应用设置',
   version: '版本',
