@@ -24,6 +24,7 @@ const PreDefMenuItemId = {
   autoStart: 'autoStart',
   noConnections: 'noConnections',
   server: 'server',
+  monitorClipboard: 'monitorClipboard',
 } as const;
 
 export async function initTrayMenu(clipItems: TextClipItem[]) {
@@ -63,6 +64,15 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     accelerator: genAccelerator('Cmd+A'),
     action() {
       emitter.emit('toggle-auto-start');
+    },
+  });
+  const monitorClipboardItem = await CheckMenuItem.new({
+    id: PreDefMenuItemId.monitorClipboard,
+    text: t('monitorClipboard'),
+    checked: settings?.clipboardListening ?? true,
+    accelerator: genAccelerator('Cmd+M'),
+    action() {
+      emitter.emit('toggle-clipboard-monitoring');
     },
   });
   const serverItem = await CheckMenuItem.new({
@@ -112,6 +122,7 @@ export async function initTrayMenu(clipItems: TextClipItem[]) {
     noConnectionsItem,
     speratorItem2,
     autoStartItem,
+    monitorClipboardItem,
     serverItem,
     clearClipboardItem,
     showWindowItem,
@@ -187,6 +198,8 @@ export async function changeTrayMenuLanguage() {
       await item.setText(t('noConnections'));
     } else if (item.id === PreDefMenuItemId.server) {
       await item.setText(t('server'));
+    } else if (item.id === PreDefMenuItemId.monitorClipboard) {
+      await item.setText(t('monitorClipboard'));
     }
   }
 }
@@ -244,6 +257,19 @@ export async function updateServerItemChecked(v: boolean) {
     return;
   }
   await (serverItem as CheckMenuItem).setChecked(v);
+}
+
+export async function updateMonitorClipboardItemChecked(v: boolean) {
+  if (!tray || !menu) {
+    return;
+  }
+  const monitorClipboardItem = await menu.get(
+    PreDefMenuItemId.monitorClipboard,
+  );
+  if (!monitorClipboardItem) {
+    return;
+  }
+  await (monitorClipboardItem as CheckMenuItem).setChecked(v);
 }
 
 function getDeviceItemInsertIdx() {

@@ -3,7 +3,10 @@ import { atom } from 'jotai';
 import { UNKNOWN_NAME } from '~/consts';
 import { ipc } from '~/ipc';
 import { getDefaultSettings } from '~/utils/common';
-import { updateAutoStartItemChecked } from '~/utils/tray';
+import {
+  updateAutoStartItemChecked,
+  updateMonitorClipboardItemChecked,
+} from '~/utils/tray';
 import { hostNameAtom, settingsAtom } from './primitive';
 import { startOrShutdownServerAtom } from './server';
 
@@ -27,6 +30,10 @@ export const initSettingsAtom = atom(null, async (get, set) => {
   if (!settings.name.trim().length || settings.name === UNKNOWN_NAME) {
     set(settingsAtom, (old) => ({ ...old, name: hostName || UNKNOWN_NAME }));
   }
+  if (settings.clipboardListening === undefined) {
+    set(settingsAtom, (old) => ({ ...old, clipboardListening: true }));
+  }
+  updateMonitorClipboardItemChecked(settings.clipboardListening ?? true);
   if (settings.server) {
     await set(startOrShutdownServerAtom, true);
   }
@@ -38,7 +45,7 @@ export const toggleAutoStartAtom = atom(
     const settings = get(settingsAtom);
     const enabled = await setAutoStart(checked ?? !settings.autoStart);
     set(settingsAtom, (old) => ({ ...old, autoStart: enabled }));
-    updateAutoStartItemChecked(enabled);
+    await updateAutoStartItemChecked(enabled);
   },
 );
 
@@ -61,3 +68,13 @@ export const resetSettingsAtom = atom(null, async (_, set) => {
   defaultSettings.name = hostName || UNKNOWN_NAME;
   set(settingsAtom, defaultSettings);
 });
+
+export const toggleClipboardMonitoringAtom = atom(
+  null,
+  async (get, set, checked?: boolean) => {
+    const settings = get(settingsAtom);
+    const newValue = checked ?? !settings.clipboardListening;
+    set(settingsAtom, (old) => ({ ...old, clipboardListening: newValue }));
+    await updateMonitorClipboardItemChecked(newValue);
+  },
+);

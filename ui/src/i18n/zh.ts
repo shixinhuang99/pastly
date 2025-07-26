@@ -51,4 +51,5 @@ export const zh: Record<TranslationKeys, string> = {
   resetSettings: '重置设置',
   scrollTop: '顶部',
   pickTypes: '选择类型',
+  monitorClipboard: '监听剪切板',
 };

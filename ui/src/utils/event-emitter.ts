@@ -1,4 +1,7 @@
-type CustomEvents = 'toggle-auto-start' | 'toggle-server';
+type CustomEvents =
+  | 'toggle-auto-start'
+  | 'toggle-server'
+  | 'toggle-clipboard-monitoring';
 
 class EventEmitter extends EventTarget {
   emit(name: CustomEvents) {

@@ -27,6 +27,7 @@ import {
   initSettingsAtom,
   resetSettingsAtom,
   toggleAutoStartAtom,
+  toggleClipboardMonitoringAtom,
   validateNameAtom,
 } from '~/atom/settings';
 import { applyMatchMediaAtom, initThemeAtom, setThemeAtom } from '~/atom/theme';
@@ -68,6 +69,7 @@ export function SettingsDialog() {
   const addDevice = useSetAtom(addDeviceAtom);
   const removeDevice = useSetAtom(removeDeviceAtom);
   const startOrShutdownServer = useSetAtom(startOrShutdownServerAtom);
+  const toggleClipboardMonitoring = useSetAtom(toggleClipboardMonitoringAtom);
 
   useOnceEffect(() => {
     initTheme();
@@ -85,6 +87,9 @@ export function SettingsDialog() {
     });
     emitter.on('toggle-server', () => {
       startOrShutdownServer();
+    });
+    emitter.on('toggle-clipboard-monitoring', () => {
+      toggleClipboardMonitoring();
     });
     ipc.listenDeviceFound((device) => {
       addDevice(device);
@@ -190,15 +195,26 @@ function AppearancesSettings() {
 function GeneralSettings() {
   const t = useT();
   const toggleAutoStart = useSetAtom(toggleAutoStartAtom);
+  const toggleClipboardMonitoring = useSetAtom(toggleClipboardMonitoringAtom);
   const settings = useAtomValue(settingsAtom);
-  const pending = useBoolean();
+  const autoStartPending = useBoolean();
+  const clipboardPending = useBoolean();
 
   const handleAutoStartToggle = async (checked: boolean) => {
     try {
-      pending.on();
+      autoStartPending.on();
       await toggleAutoStart(checked);
     } finally {
-      pending.off();
+      autoStartPending.off();
+    }
+  };
+
+  const handleClipboardMonitoringToggle = async (checked: boolean) => {
+    try {
+      clipboardPending.on();
+      await toggleClipboardMonitoring(checked);
+    } finally {
+      clipboardPending.off();
     }
   };
 
@@ -209,7 +225,14 @@ function GeneralSettings() {
         <Switch
           checked={settings.autoStart}
           onCheckedChange={handleAutoStartToggle}
-          disabled={pending.value}
+          disabled={autoStartPending.value}
+        />
+      </FormItemOnlyStyle>
+      <FormItemOnlyStyle label={t('monitorClipboard')}>
+        <Switch
+          checked={settings.clipboardListening}
+          onCheckedChange={handleClipboardMonitoringToggle}
+          disabled={clipboardPending.value}
         />
       </FormItemOnlyStyle>
     </>

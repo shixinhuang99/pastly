@@ -22,6 +22,7 @@ export interface Settings {
   name: string;
   port: number;
   pin: string;
+  clipboardListening: boolean;
 }
 
 export interface ClipItemDBSchema {

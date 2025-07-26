@@ -51,6 +51,7 @@ export const en = {
   resetSettings: 'Reset settings',
   scrollTop: 'TOP',
   pickTypes: 'Pick types',
+  monitorClipboard: 'Monitor clipboard',
 };
 
 export type TranslationKeys = keyof typeof en;

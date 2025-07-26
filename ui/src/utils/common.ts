@@ -61,6 +61,7 @@ export function getDefaultSettings(): Settings {
     name: UNKNOWN_NAME,
     port: DEFAULT_PORT,
     pin: '',
+    clipboardListening: true,
   };
 }
 

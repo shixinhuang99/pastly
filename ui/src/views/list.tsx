@@ -1,7 +1,7 @@
 import { isSameDay } from 'date-fns';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { LoaderCircle } from 'lucide-react';
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
   type UpdatedTypes,
   onSomethingUpdate,
@@ -11,7 +11,7 @@ import {
   startListening,
 } from 'tauri-plugin-clipboard-api';
 import { addClipItemAtom, initClipItemsAtom } from '~/atom/clip-items';
-import { clipItemsAtom } from '~/atom/primitive';
+import { clipItemsAtom, settingsAtom } from '~/atom/primitive';
 import { getDevicesAtom } from '~/atom/server';
 import { SearchInput } from '~/components';
 import { CountUp } from '~/components/count-up';
@@ -53,9 +53,17 @@ export function List() {
   const [date, setDate] = useState<Date>();
   const getDevices = useSetAtom(getDevicesAtom);
   const [searchTypes, setSearchTypes] = useState<string[]>([]);
+  const settings = useAtomValue(settingsAtom);
+  const isListeningRef = useRef(settings.clipboardListening);
+
+  isListeningRef.current = settings.clipboardListening;
 
   useOnceEffect(async () => {
     onSomethingUpdate(async (updateTypes: UpdatedTypes) => {
+      if (!isListeningRef.current) {
+        return;
+      }
+
       let newClipItem: ClipItem | null = null;
       if (updateTypes.files && PLATFORM !== 'linux') {
         const files = await readFiles();
