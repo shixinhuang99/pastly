@@ -26,7 +26,7 @@ export const zh: Record<TranslationKeys, string> = {
   deleteAllClipItemsConfirmTitle: '你确定要删除所有剪贴板条目吗?',
   deleteAllClipItemsConfirmDesc: '这将清空数据库',
   openDatabaseDir: '打开数据库目录',
-  clearClipboard: '清除剪切板',
+  clearClipboard: '清除系统剪切板',
   showWindow: '显示窗口',
   quit: '退出',
   pickDate: '选择日期',

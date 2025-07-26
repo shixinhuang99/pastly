@@ -25,7 +25,7 @@ export const en = {
     'Are you sure you want delete all clip items?',
   deleteAllClipItemsConfirmDesc: 'This will clear the database',
   openDatabaseDir: 'Open database dir',
-  clearClipboard: 'Clear Clipboard',
+  clearClipboard: 'Clear System Clipboard',
   showWindow: 'Show Window',
   quit: 'Quit',
   pickDate: 'Pick a date',
