@@ -62,6 +62,7 @@ export function getDefaultSettings(): Settings {
     port: DEFAULT_PORT,
     pin: '',
     clipboardListening: true,
+    autoDeleteDuplicates: true,
   };
 }
 

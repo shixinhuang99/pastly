@@ -33,6 +33,9 @@ export const initSettingsAtom = atom(null, async (get, set) => {
   if (settings.clipboardListening === undefined) {
     set(settingsAtom, (old) => ({ ...old, clipboardListening: true }));
   }
+  if (settings.autoDeleteDuplicates === undefined) {
+    set(settingsAtom, (old) => ({ ...old, autoDeleteDuplicates: true }));
+  }
   updateMonitorClipboardItemChecked(settings.clipboardListening ?? true);
   if (settings.server) {
     await set(startOrShutdownServerAtom, true);

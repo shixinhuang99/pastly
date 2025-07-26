@@ -3,6 +3,7 @@ import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { LoaderCircle, SettingsIcon, TimerReset } from 'lucide-react';
 import {
+  Eraser,
   ExternalLink,
   FolderOpen,
   Moon,
@@ -11,8 +12,9 @@ import {
   TvMinimal,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { deleteAllClipItemsAtom } from '~/atom/clip-items';
+import { Trans, useTranslation } from 'react-i18next';
+import { deleteAllClipItemsAtom, getDuplicateIdsAtom } from '~/atom/clip-items';
+import { initClipItemsAtom } from '~/atom/clip-items';
 import { addDeviceAtom, removeDeviceAtom } from '~/atom/devices';
 import { setLanguageAtom } from '~/atom/language';
 import {
@@ -42,6 +44,7 @@ import {
   Switch,
   TooltipButton,
 } from '~/components';
+import { CountUp } from '~/components/count-up';
 import {
   Dialog,
   DialogContent,
@@ -53,9 +56,11 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '~/components/shadcn/tabs';
 import { Form, FormItem, FormItemOnlyStyle } from '~/components/simple-form';
 import { DARK_MODE_MEDIA, DB_NAME, DEFAULT_PORT, Langs, Theme } from '~/consts';
-import { useBoolean, useOnceEffect, useT } from '~/hooks';
+import { useAsyncEffect, useBoolean, useOnceEffect, useT } from '~/hooks';
 import { ipc } from '~/ipc';
+import type { DuplicateIds } from '~/types';
 import { cn, scrollBarCls } from '~/utils/cn';
+import { deleteClipItemsByIds, deleteImagesByIds } from '~/utils/db';
 import { emitter } from '~/utils/event-emitter';
 import { Devices } from './devices';
 
@@ -196,7 +201,7 @@ function GeneralSettings() {
   const t = useT();
   const toggleAutoStart = useSetAtom(toggleAutoStartAtom);
   const toggleClipboardMonitoring = useSetAtom(toggleClipboardMonitoringAtom);
-  const settings = useAtomValue(settingsAtom);
+  const [settings, setSettings] = useAtom(settingsAtom);
   const autoStartPending = useBoolean();
   const clipboardPending = useBoolean();
 
@@ -233,6 +238,14 @@ function GeneralSettings() {
           checked={settings.clipboardListening}
           onCheckedChange={handleClipboardMonitoringToggle}
           disabled={clipboardPending.value}
+        />
+      </FormItemOnlyStyle>
+      <FormItemOnlyStyle label={t('autoDeleteDuplicates')}>
+        <Switch
+          checked={settings.autoDeleteDuplicates}
+          onCheckedChange={(checked) => {
+            setSettings((old) => ({ ...old, autoDeleteDuplicates: checked }));
+          }}
         />
       </FormItemOnlyStyle>
     </>
@@ -306,6 +319,7 @@ function AppInfo() {
         {t('version')}: {PKG_VERSION}
       </div>
       <DeleteAllClipItemsButton />
+      <DeleteDuplicateClipItemsButton />
       <ResetSettingsButton />
       <OpenDatabaseDirButton />
       <Button
@@ -407,5 +421,74 @@ function OpenDatabaseDirButton() {
       {t('openDatabaseDir')}
       <FolderOpen />
     </Button>
+  );
+}
+
+function DeleteDuplicateClipItemsButton() {
+  const t = useT();
+  const [duplicates, setDuplicates] = useState<DuplicateIds>({
+    ids: [],
+    imageIds: [],
+  });
+  const pending = useBoolean();
+  const open = useBoolean();
+  const getDuplicateIds = useSetAtom(getDuplicateIdsAtom);
+  const calcDuplicatesPending = useBoolean();
+  const initClipItems = useSetAtom(initClipItemsAtom);
+
+  useAsyncEffect(async () => {
+    if (open.value) {
+      calcDuplicatesPending.on();
+      const duplicates = await getDuplicateIds();
+      setDuplicates(duplicates);
+      calcDuplicatesPending.off();
+    } else {
+      setDuplicates({ ids: [], imageIds: [] });
+      calcDuplicatesPending.off();
+    }
+  }, [open.value]);
+
+  const handleClick = async () => {
+    if (!duplicates.ids.length) {
+      return;
+    }
+    try {
+      pending.on();
+      await deleteClipItemsByIds(duplicates.ids);
+      if (duplicates.imageIds.length) {
+        await deleteImagesByIds(duplicates.imageIds);
+      }
+      await initClipItems();
+    } finally {
+      pending.off();
+      open.off();
+    }
+  };
+
+  return (
+    <AlertDialog
+      title={t('deleteDuplicateClipItemsConfirmTitle')}
+      description={
+        <Trans i18nKey="deleteDuplicateClipItemsConfirmDesc">
+          This operation will delete
+          <CountUp
+            className="text-primary"
+            value={duplicates.ids.length}
+            pending={calcDuplicatesPending.value}
+          />
+          duplicates
+        </Trans>
+      }
+      open={open.value}
+      onOpenChange={open.set}
+      onOk={handleClick}
+      okLoading={pending.value}
+      okDisabled={!duplicates.ids.length}
+    >
+      <Button variant="link">
+        {t('deleteDuplicateClipItems')}
+        <Eraser />
+      </Button>
+    </AlertDialog>
   );
 }

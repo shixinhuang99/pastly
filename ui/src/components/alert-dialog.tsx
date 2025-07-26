@@ -19,11 +19,20 @@ interface AlertDialogProps {
   onOpenChange: (v: boolean) => void;
   onOk: () => void;
   okLoading?: boolean;
+  okDisabled?: boolean;
 }
 
 export function AlertDialog(props: React.PropsWithChildren<AlertDialogProps>) {
-  const { children, title, description, open, onOpenChange, onOk, okLoading } =
-    props;
+  const {
+    children,
+    title,
+    description,
+    open,
+    onOpenChange,
+    onOk,
+    okLoading,
+    okDisabled,
+  } = props;
 
   const t = useT();
 
@@ -41,7 +50,7 @@ export function AlertDialog(props: React.PropsWithChildren<AlertDialogProps>) {
           </AlertDialogCancel>
           <Button
             onClick={onOk}
-            disabled={okLoading}
+            disabled={okDisabled ?? okLoading}
             className="dark:text-foreground"
           >
             {okLoading ? <LoaderCircle className="animate-spin" /> : t('ok')}

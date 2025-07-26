@@ -129,3 +129,39 @@ export async function getClipImageByID(id: string): Promise<ClipImage> {
   );
   return result[0];
 }
+
+export async function getAllImages(): Promise<ClipImage[]> {
+  const db = await getDbInstance();
+  const result = await db.select<ClipImage[]>('SELECT * FROM images');
+  return result;
+}
+
+export async function deleteClipItemsByIds(ids: string[]) {
+  const db = await getDbInstance();
+  const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
+  await db.execute(`DELETE FROM clip_items WHERE id IN (${placeholders})`, ids);
+}
+
+export async function deleteImagesByIds(ids: string[]) {
+  const db = await getDbInstance();
+  const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
+  await db.execute(`DELETE FROM images WHERE id IN (${placeholders})`, ids);
+}
+
+export async function findClipItemsByValue(value: string): Promise<ClipItem[]> {
+  const db = await getDbInstance();
+  const result = await db.select<ClipItemDBSchema[]>(
+    'SELECT * FROM clip_items WHERE value = $1',
+    [value],
+  );
+  return convertToClipItems(result);
+}
+
+export async function findImagesByValue(value: string): Promise<ClipImage[]> {
+  const db = await getDbInstance();
+  const result = await db.select<ClipImage[]>(
+    'SELECT * FROM images WHERE value = $1',
+    [value],
+  );
+  return result;
+}

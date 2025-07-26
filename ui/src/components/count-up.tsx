@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 import CountUpPrimitive from 'react-countup';
+import { cn } from '~/utils/cn';
 
-export function CountUp(props: { value: number }) {
-  const { value } = props;
+interface CountUpProps {
+  className?: string;
+  value: number;
+  pending?: boolean;
+}
+
+export function CountUp(props: CountUpProps) {
+  const { className, value, pending = false } = props;
 
   const [startEnd, setStartEnd] = useState<[number, number]>([0, value]);
 
@@ -11,6 +18,11 @@ export function CountUp(props: { value: number }) {
   }, [value]);
 
   return (
-    <CountUpPrimitive start={startEnd[0]} end={startEnd[1]} duration={0.7} />
+    <CountUpPrimitive
+      className={cn(pending && 'animate-pulse', className)}
+      start={startEnd[0]}
+      end={startEnd[1]}
+      duration={0.7}
+    />
   );
 }

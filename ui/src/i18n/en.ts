@@ -52,6 +52,12 @@ export const en = {
   scrollTop: 'TOP',
   pickTypes: 'Pick types',
   monitorClipboard: 'Monitor clipboard',
+  deleteDuplicateClipItems: 'Delete duplicate clip items',
+  deleteDuplicateClipItemsConfirmTitle:
+    'Are you sure you want to delete all duplicates?',
+  deleteDuplicateClipItemsConfirmDesc:
+    'This operation will delete <1 /> duplicates',
+  autoDeleteDuplicates: 'Auto delete old duplicates',
 };
 
 export type TranslationKeys = keyof typeof en;

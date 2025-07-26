@@ -52,4 +52,8 @@ export const zh: Record<TranslationKeys, string> = {
   scrollTop: '顶部',
   pickTypes: '选择类型',
   monitorClipboard: '监听剪切板',
+  deleteDuplicateClipItems: '删除重复剪贴板条目',
+  deleteDuplicateClipItemsConfirmTitle: '你确定要删除所有重复项吗?',
+  deleteDuplicateClipItemsConfirmDesc: '此操作将删除 <1 /> 个重复项',
+  autoDeleteDuplicates: '自动删除旧的重复项',
 };

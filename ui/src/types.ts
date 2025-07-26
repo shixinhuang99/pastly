@@ -23,6 +23,7 @@ export interface Settings {
   port: number;
   pin: string;
   clipboardListening: boolean;
+  autoDeleteDuplicates: boolean;
 }
 
 export interface ClipItemDBSchema {
@@ -53,4 +54,9 @@ export interface JustCopiedItem {
 export interface ClipImage {
   id: string;
   value: string;
+}
+
+export interface DuplicateIds {
+  ids: string[];
+  imageIds: string[];
 }
